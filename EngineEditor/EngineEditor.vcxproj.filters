@@ -19,6 +19,18 @@
     <Filter Include="헤더 파일\utils">
       <UniqueIdentifier>{64943683-3591-488c-8210-466d4fec4a00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Windows">
+      <UniqueIdentifier>{0e9fe3a1-2f6c-4c8f-b305-b7f8bb12c895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Windows">
+      <UniqueIdentifier>{7e40e7ae-8d68-4299-ac2d-9d33e583f555}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Renderers">
+      <UniqueIdentifier>{4d3f5a6f-a106-4f48-ae12-98fc77c22f68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Renderers">
+      <UniqueIdentifier>{5c387612-d3c3-4a19-84cd-e82b6568865d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -42,10 +54,28 @@
     <ClInclude Include="enums.h">
       <Filter>헤더 파일\utils</Filter>
     </ClInclude>
+    <ClInclude Include="WindowBase.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneViewWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineEditor.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowBase.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewRenderer.h">
+      <Filter>헤더 파일\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewRenderer.cpp">
+      <Filter>소스 파일\Renderers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

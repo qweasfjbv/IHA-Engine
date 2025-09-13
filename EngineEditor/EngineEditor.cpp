@@ -1,7 +1,13 @@
 ﻿
+#include <vector>
+#include <memory>
 
 #include "framework.h"
 #include "thirdparty.h"
+
+#include "SceneViewWindow.h"
+#include "SceneViewRenderer.h"
+
 #include "EngineEditor.h"
 
 #define MAX_LOADSTRING 100
@@ -63,23 +69,27 @@ struct ExampleDescriptorHeapAllocator
 };
 
 // Data
-static FrameContext                 g_frameContext[APP_NUM_FRAMES_IN_FLIGHT] = {};
-static UINT                         g_frameIndex = 0;
+static FrameContext                     g_frameContext[APP_NUM_FRAMES_IN_FLIGHT] = {};
+static UINT                             g_frameIndex = 0;
 
-static ID3D12Device*                g_pd3dDevice = nullptr;
-static ID3D12DescriptorHeap*        g_pd3dRtvDescHeap = nullptr;
-static ID3D12DescriptorHeap*        g_pd3dSrvDescHeap = nullptr;
-static ExampleDescriptorHeapAllocator g_pd3dSrvDescHeapAlloc;
-static ID3D12CommandQueue*          g_pd3dCommandQueue = nullptr;
-static ID3D12GraphicsCommandList*   g_pd3dCommandList = nullptr;
-static ID3D12Fence*                 g_fence = nullptr;
-static HANDLE                       g_fenceEvent = nullptr;
-static UINT64                       g_fenceLastSignaledValue = 0;
-static IDXGISwapChain3*             g_pSwapChain = nullptr;
-static bool                         g_SwapChainOccluded = false;
-static HANDLE                       g_hSwapChainWaitableObject = nullptr;
-static ID3D12Resource*              g_mainRenderTargetResource[APP_NUM_BACK_BUFFERS] = {};
-static D3D12_CPU_DESCRIPTOR_HANDLE  g_mainRenderTargetDescriptor[APP_NUM_BACK_BUFFERS] = {};
+static ID3D12Device*                    g_pd3dDevice = nullptr;
+static ID3D12DescriptorHeap*            g_pd3dRtvDescHeap = nullptr;
+static ID3D12DescriptorHeap*            g_pd3dSrvDescHeap = nullptr;
+static ExampleDescriptorHeapAllocator   g_pd3dSrvDescHeapAlloc;
+static ID3D12CommandQueue*              g_pd3dCommandQueue = nullptr;
+static ID3D12GraphicsCommandList*       g_pd3dCommandList = nullptr;
+static ID3D12Fence*                     g_fence = nullptr;
+static HANDLE                           g_fenceEvent = nullptr;
+static UINT64                           g_fenceLastSignaledValue = 0;
+static IDXGISwapChain3*                 g_pSwapChain = nullptr;
+static bool                             g_SwapChainOccluded = false;
+static HANDLE                           g_hSwapChainWaitableObject = nullptr;
+static ID3D12Resource*                  g_mainRenderTargetResource[APP_NUM_BACK_BUFFERS] = {};
+static D3D12_CPU_DESCRIPTOR_HANDLE      g_mainRenderTargetDescriptor[APP_NUM_BACK_BUFFERS] = {};
+
+
+ComPtr<ID3D12CommandAllocator> m_CommandAllocator;
+ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
@@ -90,9 +100,34 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+
+// Draw Windows
+
+std::unique_ptr<SceneViewRenderer > g_SceneViewRenderer;
+std::vector<std::unique_ptr<WindowBase>> g_Windows;
+
+void DrawGameViewWindow();
+void DrawSceneViewWindow();
+void DrawHierarchWindow();
+void DrawConsoleWindow();
+void DrawInspectorWindow();
+
 // Main code
 int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
+
+#if defined(_DEBUG)
+    {
+        ComPtr<ID3D12Debug> debugController;
+        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+        {
+            debugController->EnableDebugLayer();
+        }
+    }
+#endif
+
     // Make process DPI aware and obtain main monitor scale
     ImGui_ImplWin32_EnableDpiAwareness();
     float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{ 0, 0 }, MONITOR_DEFAULTTOPRIMARY));
@@ -149,6 +184,13 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) { return g_pd3dSrvDescHeapAlloc.Free(cpu_handle, gpu_handle); };
     ImGui_ImplDX12_Init(&init_info);
 
+    // Init Editor Windows
+    g_SceneViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
+    g_Windows.push_back(std::make_unique<SceneViewWindow>(IHA_ENGINE::WINDOW_NAME_SCENEVIEW, g_SceneViewRenderer.get()));
+
+    g_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandAllocator));
+    g_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_CommandList));
+    m_CommandList->Close();
 
     // Our state
     bool show_demo_window = true;
@@ -180,7 +222,12 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
             continue;
         }
         g_SwapChainOccluded = false;
-        
+
+        // CommandList/Allocator Init
+        FrameContext* frameCtx = WaitForNextFrameResources();
+        UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
+        frameCtx->CommandAllocator->Reset();
+        g_pd3dCommandList->Reset(frameCtx->CommandAllocator, nullptr);
 
         // Start the Dear ImGui frame
         ImGui_ImplDX12_NewFrame();
@@ -208,25 +255,21 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
             ImGui::DockSpace(dockspace_id, ImVec2(.0f, .0f), ImGuiDockNodeFlags_PassthruCentralNode);
             ImGui::End();
 
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_GAMEVIEW);
-            ImGui::Text("Gameview Window");
-            ImGui::End();
+            // Render Textures
+            g_SceneViewRenderer->Resize(g_pd3dDevice, 1280, 720);
+            g_SceneViewRenderer->Render(g_pd3dCommandList);
 
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_SCENEVIEW);
-            ImGui::Text("Sceneview Window");
-            ImGui::End();
+            g_SceneViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, 2);
 
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_HIERARCHY);
-            ImGui::Text("Hierarchy Window");
-            ImGui::End();
+            // ONGUI
+            for (auto& window : g_Windows)
+                window->Draw(g_pd3dDevice, g_pd3dSrvDescHeap);
 
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_INSPECTOR);
-            ImGui::Text("Inspector Window");
-            ImGui::End();
-            
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_CONSOLE);
-            ImGui::Text("Console Window");
-            ImGui::End();
+            DrawGameViewWindow();
+            DrawSceneViewWindow();
+            DrawHierarchWindow();
+            DrawConsoleWindow();
+            DrawInspectorWindow();
 
             if (!dockInit) {
                 dockInit = true;
@@ -269,9 +312,6 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        FrameContext* frameCtx = WaitForNextFrameResources();
-        UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
-        frameCtx->CommandAllocator->Reset();
 
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -280,7 +320,6 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        g_pd3dCommandList->Reset(frameCtx->CommandAllocator, nullptr);
         g_pd3dCommandList->ResourceBarrier(1, &barrier);
 
         // Render Dear ImGui graphics
@@ -319,6 +358,46 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
     return 0;
+}
+
+void InitSceneViewWindow() {
+
+
+}
+
+void DrawGameViewWindow() {
+
+    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_GAMEVIEW);
+    ImGui::Text("Gameview Window");
+    ImGui::End();
+}
+
+
+void DrawSceneViewWindow() {
+
+    
+}
+
+void DrawHierarchWindow() {
+
+    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_HIERARCHY);
+    ImGui::Text("Hierarchy Window");
+    ImGui::End();
+
+}
+
+void DrawConsoleWindow() {
+
+    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_CONSOLE);
+    ImGui::Text("Console Window");
+    ImGui::End();
+}
+
+void DrawInspectorWindow() {
+
+    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_INSPECTOR);
+    ImGui::Text("Inspector Window");
+    ImGui::End();
 }
 
 // Helper functions

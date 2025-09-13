@@ -13,6 +13,7 @@ namespace IHA_ENGINE {
 	enum class LogLevelEnum {
 		Debug,
 		Warning,
-		Error
+		Error,
+		System
 	};
 }
