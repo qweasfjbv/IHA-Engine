@@ -1,6 +1,6 @@
 #pragma once
 
-namespace IHA_ENGINE {
+namespace IHA {
 
 	enum class EditorWindowEnum {
 		Hierarchy,

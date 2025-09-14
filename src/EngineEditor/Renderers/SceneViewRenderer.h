@@ -5,30 +5,33 @@
 #include <dxgi1_6.h>
 using Microsoft::WRL::ComPtr;
 
-class SceneViewRenderer {
+namespace IHA::Editor {
 
-public:
-	inline SceneViewRenderer(ID3D12Device* device, UINT w, UINT h) {
-		Resize(device, w, h);
-	}
-	~SceneViewRenderer() = default;
+	class SceneViewRenderer {
 
-	void Resize(ID3D12Device* device, UINT w, UINT h);
-	void Render(ID3D12GraphicsCommandList* cmd);
+	public:
+		inline SceneViewRenderer(ID3D12Device* device, UINT w, UINT h) {
+			Resize(device, w, h);
+		}
+		~SceneViewRenderer() = default;
 
-	UINT GetWidth() const { return m_Width; }
-	UINT GetHeight() const { return m_Height; }
+		void Resize(ID3D12Device* device, UINT w, UINT h);
+		void Render(ID3D12GraphicsCommandList* cmd);
 
-	ComPtr<ID3D12DescriptorHeap> GetSrvHeap() const { return m_SrvHeap; }
-	void CopySRVToHeap(ID3D12Device* device, ID3D12DescriptorHeap* dstHeap, UINT slotIndex);
+		UINT GetWidth() const { return m_Width; }
+		UINT GetHeight() const { return m_Height; }
 
-private:
-	ComPtr<ID3D12Resource> m_SceneRenderTarget;
-	ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
-	ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
+		ComPtr<ID3D12DescriptorHeap> GetSrvHeap() const { return m_SrvHeap; }
+		void CopySRVToHeap(ID3D12Device* device, ID3D12DescriptorHeap* dstHeap, UINT slotIndex);
 
-	DXGI_FORMAT m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	private:
+		ComPtr<ID3D12Resource> m_SceneRenderTarget;
+		ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
+		ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
 
-	UINT m_Width = 1280;
-	UINT m_Height = 720;
-};
+		DXGI_FORMAT m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+		UINT m_Width = 1280;
+		UINT m_Height = 720;
+	};
+}

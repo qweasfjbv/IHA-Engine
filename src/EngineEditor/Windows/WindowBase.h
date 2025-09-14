@@ -3,21 +3,24 @@
 #include <string>
 #include "d3d12.h"
 
-class WindowBase {
+namespace IHA::Editor {
 
-public:
-    WindowBase(const char* name)
-        : m_Name(name) {}
-    virtual ~WindowBase();
+    class WindowBase {
 
-    virtual void Update() {}
-    virtual void Resize(unsigned int w, unsigned int h) {}
+    public:
+        WindowBase(const char* name)
+            : m_Name(name) {}
+        virtual ~WindowBase();
 
-    void Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap);
+        virtual void Update() {}
+        virtual void Resize(unsigned int w, unsigned int h) {}
 
-protected:
+        virtual void Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap);
 
-    virtual void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) = 0;
+    protected:
 
-    std::string m_Name;
-};
+        virtual void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) = 0;
+
+        std::string m_Name;
+    };
+}

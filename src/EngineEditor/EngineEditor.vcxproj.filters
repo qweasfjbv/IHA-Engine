@@ -61,6 +61,18 @@
     <ClCompile Include="Windows\WindowBase.cpp">
       <Filter>소스 파일\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="Windows\GameViewWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\ConsoleWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\HierarchyWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\InspectorWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\EngineEditor.h">
@@ -92,6 +104,18 @@
     </ClInclude>
     <ClInclude Include="Utils\enums.h">
       <Filter>헤더 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\GameViewWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\ConsoleWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\HierarchyWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\InspectorWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

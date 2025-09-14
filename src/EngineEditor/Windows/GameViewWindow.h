@@ -6,16 +6,17 @@
 
 namespace IHA::Editor {
 
-	class SceneViewWindow : public WindowBase {
+	class GameViewWindow : public WindowBase {
 
 	public:
-		SceneViewWindow(const char* name, SceneViewRenderer* renderer);
-		~SceneViewWindow();
+		GameViewWindow(const char* name, SceneViewRenderer* renderer);
+		~GameViewWindow();
 
 	protected:
 		void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) override;
 
 	private:
+		// HACK - 나중에 GameViewRenderer로 교체 필요
 		SceneViewRenderer* m_Renderer;
 	};
 }

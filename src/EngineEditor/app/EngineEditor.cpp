@@ -1,16 +1,32 @@
 ﻿
-#include <vector>
-#include <memory>
-
-#include "framework.h"
-#include "thirdparty.h"
-
-#include "Windows/SceneViewWindow.h"
-#include "Renderers/SceneViewRenderer.h"
-
 #include "EngineEditor.h"
 
+// Standard libs
+#include <vector>
+#include <memory>
+#include <iostream>
+#include "framework.h"
+
+// Third party libs
+#include "thirdparty.h"
+
+// Windows
+#include "Windows/SceneViewWindow.h"
+#include "Windows/GameViewWindow.h"
+#include "Windows/HierarchyWindow.h"
+#include "Windows/InspectorWindow.h"
+#include "Windows/ConsoleWindow.h"
+
+// Renderers
+#include "Renderers/SceneViewRenderer.h"
+
+// Utilties
+#include "Utils/constants.h"
+#include "Utils/Enums.h"
+
 #define MAX_LOADSTRING 100
+
+using namespace IHA::Editor;
 
 // Config for example app
 static const int APP_NUM_FRAMES_IN_FLIGHT = 2;
@@ -103,32 +119,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Draw Windows
 
-std::unique_ptr<SceneViewRenderer > g_SceneViewRenderer;
+std::unique_ptr<SceneViewRenderer> g_SceneViewRenderer;
+std::unique_ptr<SceneViewRenderer> g_GameViewRenderer;
 std::vector<std::unique_ptr<WindowBase>> g_Windows;
 
-static bool show_grid = true;
+static bool g_dockInit = false;
 
-void DrawGameViewWindow();
-void DrawSceneViewWindow();
-void DrawHierarchWindow();
-void DrawConsoleWindow();
-void DrawInspectorWindow();
+void DrawMainMenuBar();
+void DrawDockedWindows();
 
 // Main code
 int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
     AllocConsole();
     freopen("CONOUT$", "w", stdout);
-
-#if defined(_DEBUG)
-    {
-        ComPtr<ID3D12Debug> debugController;
-        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-        {
-            debugController->EnableDebugLayer();
-        }
-    }
-#endif
 
     // Make process DPI aware and obtain main monitor scale
     ImGui_ImplWin32_EnableDpiAwareness();
@@ -137,7 +141,7 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     // Create application window
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX12 Example", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"IHA ENGINE <DX12>", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -160,6 +164,7 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -186,10 +191,22 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) { return g_pd3dSrvDescHeapAlloc.Free(cpu_handle, gpu_handle); };
     ImGui_ImplDX12_Init(&init_info);
 
+    // Set Fonts
+    std::string fontPath = "../../" + std::string(IHA::PATH_FONT) + std::string(IHA::FONT_NAME);
+    ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+    io.Fonts->Build();
+    // ImGui::PushFont(font);
+    io.FontDefault = font;
 
     // Init Editor Windows
     g_SceneViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
-    g_Windows.push_back(std::make_unique<SceneViewWindow>(IHA_ENGINE::WINDOW_NAME_SCENEVIEW, g_SceneViewRenderer.get()));
+    g_GameViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
+    
+    g_Windows.push_back(std::make_unique<SceneViewWindow>(IHA::WINDOW_NAME_SCENEVIEW, g_SceneViewRenderer.get()));
+    g_Windows.push_back(std::make_unique<GameViewWindow>(IHA::WINDOW_NAME_GAMEVIEW, g_GameViewRenderer.get()));
+    g_Windows.push_back(std::make_unique<ConsoleWindow>(IHA::WINDOW_NAME_CONSOLE));
+    g_Windows.push_back(std::make_unique<HierarchyWindow>(IHA::WINDOW_NAME_HIERARCHY));
+    g_Windows.push_back(std::make_unique<InspectorWindow>(IHA::WINDOW_NAME_INSPECTOR));
 
     g_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandAllocator));
     g_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_CommandList));
@@ -198,10 +215,7 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
-    bool dockInit = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-
 
     // Main loop
     bool done = false;
@@ -239,97 +253,8 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("파일"))
-            {
-                if (ImGui::MenuItem("새로 만들기")) {}
-                if (ImGui::MenuItem("열기")) {}
-                if (ImGui::MenuItem("저장")) {}
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("설정"))
-            {
-                if (ImGui::MenuItem("환경설정")) {}
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-         
-
-
-        {
-            ImGuiWindowFlags fullscreen_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar
-                | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
-                | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
-                | ImGuiWindowFlags_NoNavFocus;
-
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            float menuBarHeight = ImGui::GetFrameHeight();
-            
-            ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y+ menuBarHeight));
-            ImGui::SetNextWindowSize(viewport->Size);
-            ImGui::SetNextWindowViewport(viewport->ID);
-
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-
-
-            ImGui::Begin(IHA_ENGINE::WINDOW_NAME_FULLSCREEN, nullptr, fullscreen_flags);
-            ImGui::PopStyleVar(2);
-
-            ImGuiID dockspace_id = ImGui::GetID(IHA_ENGINE::DOCK_NAME_DEFAULT);
-            ImGui::DockSpace(dockspace_id, ImVec2(.0f, .0f), ImGuiDockNodeFlags_PassthruCentralNode);
-            ImGui::End();
-
-            // Render Textures
-            g_SceneViewRenderer->Resize(g_pd3dDevice, 1280, 720);
-            g_SceneViewRenderer->Render(g_pd3dCommandList);
-
-            g_SceneViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, 2);
-
-            // ONGUI
-            for (auto& window : g_Windows)
-                window->Draw(g_pd3dDevice, g_pd3dSrvDescHeap);
-
-            DrawGameViewWindow();
-            DrawSceneViewWindow();
-            DrawHierarchWindow();
-            DrawConsoleWindow();
-            DrawInspectorWindow();
-
-            if (!dockInit) {
-                dockInit = true;
-
-                ImGui::DockBuilderRemoveNode(dockspace_id);
-                ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
-                ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-
-                ImGuiID dock_left, dock_center, dock_right;
-                ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.6f, &dock_left, &dock_center);
-                ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.5f, &dock_right, &dock_center);
-
-                ImGuiID dock_left_top, dock_left_bottom;
-                ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Up, 0.5f, &dock_left_top, &dock_left_bottom);
-
-                ImGuiID dock_center_top, dock_center_bottom;
-                ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Up, 0.5f, &dock_center_top, &dock_center_bottom);
-
-                ImGuiID dock_right_panel = dock_right;
-
-                ImGui::DockBuilderDockWindow(IHA_ENGINE::WINDOW_NAME_GAMEVIEW, dock_left_top);
-                ImGui::DockBuilderDockWindow(IHA_ENGINE::WINDOW_NAME_SCENEVIEW, dock_left_bottom);
-                ImGui::DockBuilderDockWindow(IHA_ENGINE::WINDOW_NAME_HIERARCHY, dock_center_top);
-                ImGui::DockBuilderDockWindow(IHA_ENGINE::WINDOW_NAME_CONSOLE, dock_center_bottom);
-                ImGui::DockBuilderDockWindow(IHA_ENGINE::WINDOW_NAME_INSPECTOR, dock_right_panel);
-
-                // 완료
-                ImGui::DockBuilderFinish(dockspace_id);
-            }
-
-        }
+        DrawMainMenuBar();
+        DrawDockedWindows();
 
         // Rendering
         ImGui::Render();
@@ -388,45 +313,95 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     return 0;
 }
 
-void InitSceneViewWindow() {
-
-
+void DrawMainMenuBar() {
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu(u8"파일"))
+        {
+            if (ImGui::MenuItem(u8"새로 만들기")) {}
+            if (ImGui::MenuItem(u8"열기")) {}
+            if (ImGui::MenuItem(u8"저장")) {}
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu(u8"설정"))
+        {
+            if (ImGui::MenuItem(u8"환경설정")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
 }
 
-void DrawGameViewWindow() {
+void DrawDockedWindows()
+{
+    ImGuiWindowFlags fullscreen_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar
+        | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
+        | ImGuiWindowFlags_NoNavFocus;
 
-    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_GAMEVIEW);
-    ImGui::Text("Gameview Window");
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    float menuBarHeight = ImGui::GetFrameHeight();
+
+    ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + menuBarHeight));
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+    ImGui::Begin(IHA::WINDOW_NAME_FULLSCREEN, nullptr, fullscreen_flags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspace_id = ImGui::GetID(IHA::DOCK_NAME_DEFAULT);
+    ImGui::DockSpace(dockspace_id, ImVec2(.0f, .0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
-}
 
+    // Render Textures
+    g_SceneViewRenderer->Resize(g_pd3dDevice, 1280, 720);
+    g_SceneViewRenderer->Render(g_pd3dCommandList);
+    g_SceneViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, IHA::SLOT_ID_SCENEVIEW);
 
-void DrawSceneViewWindow() {
-
+    g_GameViewRenderer->Resize(g_pd3dDevice, 1280, 720);
+    g_GameViewRenderer->Render(g_pd3dCommandList);
+    g_GameViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, IHA::SLOT_ID_GAMEVIEW);
     
+
+    // OnGUI
+    for (auto& window : g_Windows)
+        window->Draw(g_pd3dDevice, g_pd3dSrvDescHeap);
+
+    if (!g_dockInit) {
+        g_dockInit = true;
+
+        ImGui::DockBuilderRemoveNode(dockspace_id);
+        ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
+        ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+        ImGuiID dock_left, dock_center, dock_right;
+        ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.6f, &dock_left, &dock_center);
+        ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.5f, &dock_right, &dock_center);
+
+        ImGuiID dock_left_top, dock_left_bottom;
+        ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Up, 0.5f, &dock_left_top, &dock_left_bottom);
+
+        ImGuiID dock_center_top, dock_center_bottom;
+        ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Up, 0.5f, &dock_center_top, &dock_center_bottom);
+
+        ImGuiID dock_right_panel = dock_right;
+
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_GAMEVIEW, dock_left_top);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_SCENEVIEW, dock_left_bottom);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_HIERARCHY, dock_center_top);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_CONSOLE, dock_center_bottom);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_INSPECTOR, dock_right_panel);
+
+        // 완료
+        ImGui::DockBuilderFinish(dockspace_id);
+    }
+
 }
 
-void DrawHierarchWindow() {
-
-    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_HIERARCHY);
-    ImGui::Text("Hierarchy Window");
-    ImGui::End();
-
-}
-
-void DrawConsoleWindow() {
-
-    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_CONSOLE);
-    ImGui::Text("Console Window");
-    ImGui::End();
-}
-
-void DrawInspectorWindow() {
-
-    ImGui::Begin(IHA_ENGINE::WINDOW_NAME_INSPECTOR);
-    ImGui::Text("Inspector Window");
-    ImGui::End();
-}
 
 // Helper functions
 

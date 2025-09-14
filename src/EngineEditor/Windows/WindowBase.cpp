@@ -2,13 +2,21 @@
 #include "WindowBase.h"
 #include "../StaticThirdParty/ImGUI/imgui.h"
 
-WindowBase::~WindowBase() {}
+namespace IHA::Editor {
 
-void WindowBase::Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	WindowBase::~WindowBase() {}
 
-	ImGui::Begin(m_Name.c_str());
+	void WindowBase::Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
 
-	// TODO - Check conditions (ex. visibility)
-	OnGUI(device, srvHeap);
-	ImGui::End();
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+		ImGui::Begin(m_Name.c_str());
+		ImGui::PopStyleVar(3);
+
+		// TODO - Check conditions (ex. visibility)
+		OnGUI(device, srvHeap);
+		ImGui::End();
+	}
 }
