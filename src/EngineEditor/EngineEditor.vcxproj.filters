@@ -16,9 +16,6 @@
     <Filter Include="헤더 파일\app">
       <UniqueIdentifier>{1c844a79-7e5b-4778-b80d-ed943c353f30}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\utils">
-      <UniqueIdentifier>{64943683-3591-488c-8210-466d4fec4a00}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Windows">
       <UniqueIdentifier>{0e9fe3a1-2f6c-4c8f-b305-b7f8bb12c895}</UniqueIdentifier>
     </Filter>
@@ -31,52 +28,12 @@
     <Filter Include="소스 파일\Renderers">
       <UniqueIdentifier>{5c387612-d3c3-4a19-84cd-e82b6568865d}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineEditor.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="constants.h">
-      <Filter>헤더 파일\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="enums.h">
-      <Filter>헤더 파일\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowBase.h">
-      <Filter>헤더 파일\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneViewWindow.h">
-      <Filter>헤더 파일\Windows</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="EngineEditor.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowBase.cpp">
-      <Filter>소스 파일\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneViewWindow.cpp">
-      <Filter>소스 파일\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneViewRenderer.h">
-      <Filter>헤더 파일\Renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneViewRenderer.cpp">
-      <Filter>소스 파일\Renderers</Filter>
-    </ClCompile>
+    <Filter Include="소스 파일\app">
+      <UniqueIdentifier>{521b6833-dda6-4b16-ba20-0777378a3654}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Utils">
+      <UniqueIdentifier>{64943683-3591-488c-8210-466d4fec4a00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EngineEditor.rc">
@@ -90,5 +47,51 @@
     <Image Include="EngineEditor.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="app\EngineEditor.cpp">
+      <Filter>소스 파일\app</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\SceneViewRenderer.cpp">
+      <Filter>소스 파일\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\SceneViewWindow.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\WindowBase.cpp">
+      <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="app\EngineEditor.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\framework.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\resource.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\targetver.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="app\thirdparty.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\SceneViewRenderer.h">
+      <Filter>헤더 파일\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\SceneViewWindow.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\WindowBase.h">
+      <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\constants.h">
+      <Filter>헤더 파일\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\enums.h">
+      <Filter>헤더 파일\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

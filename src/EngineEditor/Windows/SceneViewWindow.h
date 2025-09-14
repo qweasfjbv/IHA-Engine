@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WindowBase.h"
-#include "SceneViewRenderer.h"
-#include "constants.h"
+#include "Renderers/SceneViewRenderer.h"
+#include "Utils/constants.h"
 
 class SceneViewWindow : public WindowBase {
 

@@ -5,8 +5,8 @@
 #include "framework.h"
 #include "thirdparty.h"
 
-#include "SceneViewWindow.h"
-#include "SceneViewRenderer.h"
+#include "Windows/SceneViewWindow.h"
+#include "Renderers/SceneViewRenderer.h"
 
 #include "EngineEditor.h"
 
@@ -106,6 +106,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 std::unique_ptr<SceneViewRenderer > g_SceneViewRenderer;
 std::vector<std::unique_ptr<WindowBase>> g_Windows;
 
+static bool show_grid = true;
+
 void DrawGameViewWindow();
 void DrawSceneViewWindow();
 void DrawHierarchWindow();
@@ -184,6 +186,7 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) { return g_pd3dSrvDescHeapAlloc.Free(cpu_handle, gpu_handle); };
     ImGui_ImplDX12_Init(&init_info);
 
+
     // Init Editor Windows
     g_SceneViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
     g_Windows.push_back(std::make_unique<SceneViewWindow>(IHA_ENGINE::WINDOW_NAME_SCENEVIEW, g_SceneViewRenderer.get()));
@@ -197,6 +200,8 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     bool show_another_window = false;
     bool dockInit = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+
 
     // Main loop
     bool done = false;
@@ -234,6 +239,26 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("파일"))
+            {
+                if (ImGui::MenuItem("새로 만들기")) {}
+                if (ImGui::MenuItem("열기")) {}
+                if (ImGui::MenuItem("저장")) {}
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("설정"))
+            {
+                if (ImGui::MenuItem("환경설정")) {}
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+         
+
+
         {
             ImGuiWindowFlags fullscreen_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar
                 | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
@@ -241,12 +266,16 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 | ImGuiWindowFlags_NoNavFocus;
 
             ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->Pos);
+            float menuBarHeight = ImGui::GetFrameHeight();
+            
+            ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y+ menuBarHeight));
             ImGui::SetNextWindowSize(viewport->Size);
             ImGui::SetNextWindowViewport(viewport->ID);
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+
 
             ImGui::Begin(IHA_ENGINE::WINDOW_NAME_FULLSCREEN, nullptr, fullscreen_flags);
             ImGui::PopStyleVar(2);
@@ -300,7 +329,6 @@ int WINAPI wWinMain(HINSTANCE hInstane, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 ImGui::DockBuilderFinish(dockspace_id);
             }
 
-            ImGui::DockBuilderFinish(dockspace_id);
         }
 
         // Rendering

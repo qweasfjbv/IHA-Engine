@@ -1,8 +1,6 @@
 #include "SceneViewRenderer.h"
 #include <stdexcept>
 
-#include <iostream>
-
 void SceneViewRenderer::Resize(ID3D12Device* device, UINT w, UINT h) {
 
 	if (!device) return;
