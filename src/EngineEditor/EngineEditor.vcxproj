@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\EngineEditor.cpp" />
+    <ClCompile Include="app\Scene.cpp" />
     <ClCompile Include="Renderers\SceneViewRenderer.cpp" />
     <ClCompile Include="Windows\ConsoleWindow.cpp" />
     <ClCompile Include="Windows\GameViewWindow.cpp" />
@@ -155,9 +156,12 @@
     <ClInclude Include="app\EngineEditor.h" />
     <ClInclude Include="app\framework.h" />
     <ClInclude Include="app\resource.h" />
+    <ClInclude Include="app\Scene.h" />
     <ClInclude Include="app\targetver.h" />
     <ClInclude Include="app\thirdparty.h" />
     <ClInclude Include="Renderers\SceneViewRenderer.h" />
+    <ClInclude Include="Structs\Buffers.h" />
+    <ClInclude Include="Structs\Material.h" />
     <ClInclude Include="Utils\constants.h" />
     <ClInclude Include="Utils\enums.h" />
     <ClInclude Include="Windows\ConsoleWindow.h" />

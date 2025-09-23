@@ -34,6 +34,9 @@
     <Filter Include="헤더 파일\Utils">
       <UniqueIdentifier>{64943683-3591-488c-8210-466d4fec4a00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Structs">
+      <UniqueIdentifier>{c22985d7-9995-4d53-aa11-3f7a367ba544}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EngineEditor.rc">
@@ -72,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="Windows\InspectorWindow.cpp">
       <Filter>소스 파일\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="app\Scene.cpp">
+      <Filter>소스 파일\app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +122,15 @@
     </ClInclude>
     <ClInclude Include="Windows\InspectorWindow.h">
       <Filter>헤더 파일\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Scene.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="Structs\Buffers.h">
+      <Filter>헤더 파일\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="Structs\Material.h">
+      <Filter>헤더 파일\Structs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

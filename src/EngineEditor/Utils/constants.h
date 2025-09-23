@@ -15,7 +15,7 @@ namespace IHA {
 
 	constexpr const char* PATH_FONT = "assets/Fonts/";
 
-	constexpr const char* FONT_NAME = "Daisy.ttf";
+	constexpr const char* FONT_NAME = "Concon.ttf";
 
 	constexpr const int SLOT_ID_SCENEVIEW = 2;
 	constexpr const int SLOT_ID_GAMEVIEW = 3;
