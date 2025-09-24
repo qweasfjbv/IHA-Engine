@@ -31,7 +31,7 @@ namespace IHA {
     class Scene {
         std::vector<std::unique_ptr<SceneObject>> objects;
     public:
-        void AddObject(SceneObject* obj);
+        void AddObject(SceneObject* obj, SceneObject* parent);
         void RemoveObject(SceneObject* obj);
         const std::vector<std::unique_ptr<SceneObject>>& GetObjects() const;
     };
