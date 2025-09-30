@@ -390,8 +390,8 @@ void DrawDockedWindows()
 
         ImGuiID dock_right_panel = dock_right;
 
-        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_GAMEVIEW, dock_left_top);
-        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_SCENEVIEW, dock_left_bottom);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_SCENEVIEW, dock_left_top);
+        ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_GAMEVIEW, dock_left_bottom);
         ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_HIERARCHY, dock_center_top);
         ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_CONSOLE, dock_center_bottom);
         ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_INSPECTOR, dock_right_panel);

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <memory>
 #include <DirectXMath.h>
 #include <Structs/Buffers.h>
 #include <Structs/Material.h>
 
-using namespace DirectX;
+using namespace DirectX; 
+using EntityID = uint32_t;
 
 namespace IHA {
 
@@ -16,23 +18,45 @@ namespace IHA {
         XMFLOAT3 scale;
     };
 
-    struct MeshRenderer {
-        VertexBuffer vb;
-        IndexBuffer ib;
-        Material* material;
+    struct Entity {
+        EntityID id;
     };
 
-    struct SceneObject {
-        Transform transform;
-        MeshRenderer* renderer;
-        std::vector<SceneObject*> children;
+    template<typename T>
+    struct ComponentStorage {
+        std::unordered_map<EntityID, T> data;
     };
 
     class Scene {
-        std::vector<std::unique_ptr<SceneObject>> objects;
+
     public:
-        void AddObject(SceneObject* obj, SceneObject* parent);
-        void RemoveObject(SceneObject* obj);
-        const std::vector<std::unique_ptr<SceneObject>>& GetObjects() const;
+        Entity createEntity() {
+            Entity e{ nextID++ };
+            entities.push_back(e);
+            return e;
+        }
+
+        template<typename T>
+        void addComponent(Entity e, const T& component) {
+            getStorage<T>().data[e.id] = component;
+        }
+
+        template<typename T>
+        T* getComponent(Entity e) {
+            auto& storage = getStorage<T>().data;
+            auto it = storage.find(e.id);
+            return (it != storage.end()) ? &it->second : nullptr;
+        }
+
+    private:
+        EntityID nextID = 1;
+        std::vector<Entity> entities;
+
+        ComponentStorage<Transform> transforms;
+        // ComponentStorage<Model> models;
+
+        template<typename T>
+        ComponentStorage<T>& getStorage();
+
     };
 }
