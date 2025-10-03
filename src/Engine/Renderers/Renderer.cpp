@@ -1,9 +1,9 @@
-#include "SceneViewRenderer.h"
+#include "Renderer.h"
 #include <stdexcept>
 
-namespace IHA::Editor {
+namespace IHA::Engine {
 
-	void SceneViewRenderer::Resize(ID3D12Device* device, UINT w, UINT h) {
+	void Renderer::Resize(ID3D12Device* device, UINT w, UINT h) {
 
 		if (!device) return;
 		if (w == m_Width && h == m_Height && m_SceneRenderTarget) return;
@@ -84,7 +84,7 @@ namespace IHA::Editor {
 			m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
-	void SceneViewRenderer::Render(ID3D12GraphicsCommandList* cmd) {
+	void Renderer::RenderFrame(ID3D12GraphicsCommandList* cmd) {
 
 		if (!cmd || !m_SceneRenderTarget) return;
 
@@ -120,7 +120,7 @@ namespace IHA::Editor {
 		cmd->ResourceBarrier(1, &psBarrier);
 	}
 
-	void SceneViewRenderer::CopySRVToHeap(ID3D12Device* device, ID3D12DescriptorHeap* dstHeap, UINT slotIndex)
+	void Renderer::CopySRVToHeap(ID3D12Device* device, ID3D12DescriptorHeap* dstHeap, UINT slotIndex)
 	{
 		UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = dstHeap->GetCPUDescriptorHandleForHeapStart();

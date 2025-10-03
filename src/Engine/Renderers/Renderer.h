@@ -5,18 +5,18 @@
 #include <dxgi1_6.h>
 using Microsoft::WRL::ComPtr;
 
-namespace IHA::Editor {
+namespace IHA::Engine {
 
-	class SceneViewRenderer {
+	class Renderer {
 
 	public:
-		inline SceneViewRenderer(ID3D12Device* device, UINT w, UINT h) {
+		inline Renderer(ID3D12Device* device, UINT w, UINT h) {
 			Resize(device, w, h);
 		}
-		~SceneViewRenderer() = default;
+		~Renderer() = default;
 
 		void Resize(ID3D12Device* device, UINT w, UINT h);
-		void Render(ID3D12GraphicsCommandList* cmd);
+		void RenderFrame(ID3D12GraphicsCommandList* cmd);
 
 		UINT GetWidth() const { return m_Width; }
 		UINT GetHeight() const { return m_Height; }

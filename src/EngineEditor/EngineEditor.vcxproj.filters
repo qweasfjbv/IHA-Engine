@@ -22,12 +22,6 @@
     <Filter Include="소스 파일\Windows">
       <UniqueIdentifier>{7e40e7ae-8d68-4299-ac2d-9d33e583f555}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Renderers">
-      <UniqueIdentifier>{4d3f5a6f-a106-4f48-ae12-98fc77c22f68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Renderers">
-      <UniqueIdentifier>{5c387612-d3c3-4a19-84cd-e82b6568865d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\app">
       <UniqueIdentifier>{521b6833-dda6-4b16-ba20-0777378a3654}</UniqueIdentifier>
     </Filter>
@@ -54,9 +48,6 @@
   <ItemGroup>
     <ClCompile Include="app\EngineEditor.cpp">
       <Filter>소스 파일\app</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\SceneViewRenderer.cpp">
-      <Filter>소스 파일\Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Windows\SceneViewWindow.cpp">
       <Filter>소스 파일\Windows</Filter>
@@ -95,9 +86,6 @@
     </ClInclude>
     <ClInclude Include="app\thirdparty.h">
       <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderers\SceneViewRenderer.h">
-      <Filter>헤더 파일\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="Windows\SceneViewWindow.h">
       <Filter>헤더 파일\Windows</Filter>
