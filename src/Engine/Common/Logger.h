@@ -1,0 +1,19 @@
+#pragma once
+
+#include <string>
+#include <functional>
+
+namespace IHA::Engine {
+	
+	enum class LogLevel { Info, Warning, Error, System };
+
+	static class Logger {
+
+	public:
+		static void Init();
+		static void Shutdown();
+
+		static void Log(LogLevel level, const std::string message);
+		static void SetOutput(std::function<void(LogLevel, const std::string&)> callback);
+	};
+}

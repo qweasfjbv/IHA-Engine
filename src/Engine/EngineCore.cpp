@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "EngineCore.h"
 #include <memory>
 #include <iostream>
 
@@ -9,7 +9,80 @@
 
 namespace IHA::Engine {
 
-	bool Engine::CreateDeviceD3D(HWND hwnd)
+	bool EngineCore::Init(HWND hWnd)
+	{
+		if (!CreateDeviceD3D(hWnd)) return false;
+	}
+
+	void EngineCore::PreUpdate()
+	{
+	}
+
+	void EngineCore::BeginFrame() 
+	{
+		// Reset command list
+		FrameContext* frameCtx = WaitForNextFrameResources();
+		UINT backBufferIdx = m_swapChain->GetCurrentBackBufferIndex();
+		frameCtx->commandAllocator->Reset();
+		m_commandList->Reset(frameCtx->commandAllocator, nullptr);
+
+		// Ready resource barrier
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = m_renderTargetResources[backBufferIdx];
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		m_commandList->ResourceBarrier(1, &barrier);
+	}
+
+	void EngineCore::EndFrame()
+	{
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		m_commandList->ResourceBarrier(1, &barrier);
+		m_commandList->Close();
+
+		m_commandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_commandList);
+	}
+
+	void EngineCore::Update()
+	{
+		// TODO - module updates
+	}
+
+	void EngineCore::PostUpdate()
+	{
+	}
+
+	void EngineCore::Render()
+	{
+	}
+
+	void EngineCore::Present() 
+	{
+		HRESULT hr = m_swapChain->Present(1, 0);
+		
+		UINT64 fenceValue = m_fenceLastSignaledValue + 1;
+		m_commandQueue->Signal(m_fence, fenceValue);
+		m_fenceLastSignaledValue = fenceValue;
+		m_frameContext[m_frameIndex % APP_NUM_FRAMES_IN_FLIGHT].fenceValue = fenceValue;
+	}
+
+	void EngineCore::ShutDown()
+	{
+		CleanupDeviceD3D();
+	}
+
+	bool EngineCore::IsSwapChainOccluded() 
+	{
+		if (!m_swapChain) return false;
+		return (m_swapChain->Present(0, DXGI_PRESENT_TEST) == DXGI_STATUS_OCCLUDED);
+	}
+
+	bool EngineCore::CreateDeviceD3D(HWND hwnd)
 	{
 		DXGI_SWAP_CHAIN_DESC1 sd; {
 			ZeroMemory(&sd, sizeof(sd));
@@ -70,11 +143,14 @@ namespace IHA::Engine {
 
 		{	/* Create Game SRV Heap */
 			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+			m_cbvSrvUavDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 			desc.NumDescriptors = APP_SRV_HEAP_SIZE;
 			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			if (m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_cbvSrvUavDescHeap)) != S_OK)
 				return false;
+
+			g_srvDescHeapAlloc = new DescriptorHeapAllocator(m_cbvSrvUavDescHeap, APP_SRV_HEAP_SIZE, m_cbvSrvUavDescSize);
 		}
 
 		{	/* Create Command Objects */
@@ -132,7 +208,7 @@ namespace IHA::Engine {
 		return true;
 	}
 
-	void Engine::CleanupDeviceD3D()
+	void EngineCore::CleanupDeviceD3D()
 	{
 		WaitForLastSubmittedFrame();
 
@@ -161,7 +237,7 @@ namespace IHA::Engine {
 #endif
 	}
 
-	void Engine::WaitForLastSubmittedFrame()
+	void EngineCore::WaitForLastSubmittedFrame()
 	{
 		FrameContext* frameCtx = &m_frameContext[m_frameIndex % APP_NUM_FRAMES_IN_FLIGHT];
 
@@ -177,7 +253,7 @@ namespace IHA::Engine {
 		WaitForSingleObject(m_fenceEvent, INFINITE);
 	}
 
-	FrameContext* Engine::WaitForNextFrameResources()
+	FrameContext* EngineCore::WaitForNextFrameResources()
 	{
 		UINT nextFrameIndex = m_frameIndex + 1;
 		m_frameIndex = nextFrameIndex;

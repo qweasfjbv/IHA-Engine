@@ -70,6 +70,9 @@
     <ClCompile Include="app\Scene.cpp">
       <Filter>소스 파일\app</Filter>
     </ClCompile>
+    <ClCompile Include="app\Entry.cpp">
+      <Filter>소스 파일\app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\EngineEditor.h">

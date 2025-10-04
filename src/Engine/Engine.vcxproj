@@ -141,14 +141,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Common\Logger.h" />
+    <ClInclude Include="EngineCore.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderers\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EngineCore.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
