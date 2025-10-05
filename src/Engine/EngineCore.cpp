@@ -1,6 +1,8 @@
 #include "EngineCore.h"
 #include <memory>
 #include <iostream>
+#include <cassert>
+#include "Core/World.h"
 
 #ifdef DX12_ENABLE_DEBUG_LAYER
 #include <dxgidebug.h>
@@ -12,6 +14,18 @@ namespace IHA::Engine {
 	bool EngineCore::Init(HWND hWnd)
 	{
 		if (!CreateDeviceD3D(hWnd)) return false;
+		CreateRenderTarget();
+	
+		m_cyclables.push_back(m_world);
+	}
+
+	void EngineCore::Resize(LPARAM lParam)
+	{
+		WaitForLastSubmittedFrame();
+		CleanupRenderTarget();
+		HRESULT result = m_swapChain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
+		assert(SUCCEEDED(result) && "Failed to resize swapchain.");
+		CreateRenderTarget();
 	}
 
 	void EngineCore::PreUpdate()
@@ -50,7 +64,9 @@ namespace IHA::Engine {
 
 	void EngineCore::Update()
 	{
-		// TODO - module updates
+		// HACK - Timer ÇÊ¿ä
+		for (const auto& cycle : m_cyclables)
+			cycle->Update(0.01f);
 	}
 
 	void EngineCore::PostUpdate()
@@ -73,6 +89,7 @@ namespace IHA::Engine {
 
 	void EngineCore::ShutDown()
 	{
+		CleanupRenderTarget();
 		CleanupDeviceD3D();
 	}
 
@@ -195,25 +212,12 @@ namespace IHA::Engine {
 			m_swapChainWaitableObject = m_swapChain->GetFrameLatencyWaitableObject();
 		}
 
-		{	/* Create Render Target */
-			for (UINT i = 0; i < APP_NUM_BACK_BUFFERS; i++)
-			{
-				ID3D12Resource* backBuffer = nullptr;
-				m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
-				m_device->CreateRenderTargetView(backBuffer, nullptr, m_renderTargetDescs[i]);
-				m_renderTargetResources[i] = backBuffer;
-			}
-		}
-
 		return true;
 	}
 
 	void EngineCore::CleanupDeviceD3D()
 	{
 		WaitForLastSubmittedFrame();
-
-		for (UINT i = 0; i < APP_NUM_BACK_BUFFERS; i++)
-			if (m_renderTargetResources[i]) { m_renderTargetResources[i]->Release(); m_renderTargetResources[i] = nullptr; }
 
 		if (m_swapChain) { m_swapChain->SetFullscreenState(false, nullptr); m_swapChain->Release(); m_swapChain = nullptr; }
 		if (m_swapChainWaitableObject != nullptr) { CloseHandle(m_swapChainWaitableObject); }
@@ -235,6 +239,23 @@ namespace IHA::Engine {
 			pDebug->Release();
 		}
 #endif
+	}
+
+	void EngineCore::CreateRenderTarget()
+	{
+		for (UINT i = 0; i < APP_NUM_BACK_BUFFERS; i++)
+		{
+			ID3D12Resource* backBuffer = nullptr;
+			m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
+			m_device->CreateRenderTargetView(backBuffer, nullptr, m_renderTargetDescs[i]);
+			m_renderTargetResources[i] = backBuffer;
+		}
+	}
+
+	void EngineCore::CleanupRenderTarget()
+	{
+		for (UINT i = 0; i < APP_NUM_BACK_BUFFERS; i++)
+			if (m_renderTargetResources[i]) { m_renderTargetResources[i]->Release(); m_renderTargetResources[i] = nullptr; }
 	}
 
 	void EngineCore::WaitForLastSubmittedFrame()

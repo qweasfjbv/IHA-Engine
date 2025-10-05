@@ -13,17 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Renderers">
-      <UniqueIdentifier>{e21dae29-98cf-415b-b041-9785a68f902b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더 파일\Renderers">
-      <UniqueIdentifier>{891d1cab-66f2-4147-b9d6-4a39b2f163c9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Common">
       <UniqueIdentifier>{20295d54-1f5d-41c9-a0ae-fb1b4982a0e3}</UniqueIdentifier>
     </Filter>
     <Filter Include="헤더 파일\Common">
       <UniqueIdentifier>{9827feaf-8c84-4603-8daa-8860a5cc50da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Core">
+      <UniqueIdentifier>{dd019fac-09a9-4b0e-b285-e14f3802d39b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Core">
+      <UniqueIdentifier>{b15703a0-d63b-4ae4-b076-a529e1b2e39c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Utils">
+      <UniqueIdentifier>{3ac78943-56af-4194-9859-6147f98b1bdd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,14 +36,23 @@
     <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Renderers\Renderer.h">
-      <Filter>헤더 파일\Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="EngineCore.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Common\Logger.h">
       <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ResourceManager.h">
+      <Filter>헤더 파일\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer.h">
+      <Filter>헤더 파일\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ECS.h">
+      <Filter>헤더 파일\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\World.h">
+      <Filter>헤더 파일\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,14 +62,23 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Renderers\Renderer.cpp">
-      <Filter>소스 파일\Renderers</Filter>
-    </ClCompile>
     <ClCompile Include="EngineCore.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Common\Logger.cpp">
       <Filter>소스 파일\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ResourceManager.cpp">
+      <Filter>소스 파일\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer.cpp">
+      <Filter>소스 파일\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\ECS.cpp">
+      <Filter>소스 파일\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\World.cpp">
+      <Filter>소스 파일\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

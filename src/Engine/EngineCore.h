@@ -9,6 +9,9 @@ namespace IHA::Engine {
 	class Renderer;
 	class SceneGraph;
 	class ResourceManager;
+	class World;
+
+	struct ICyclable;
 
 	struct FrameContext
 	{
@@ -50,21 +53,25 @@ namespace IHA::Engine {
 
 	public:
 		bool Init(HWND hwnd);
+		void Resize(LPARAM lParam);
+		void ShutDown();
+
+		void BeginFrame();
 		void PreUpdate();
 		void Update();
 		void PostUpdate();
-		void BeginFrame();
-		void EndFrame();
 		void Render();
+		void EndFrame();
 		void Present();
 
-		void ShutDown();
 		void WaitForLastSubmittedFrame();
 		bool IsSwapChainOccluded();
 
 	private:
 		bool CreateDeviceD3D(HWND hwnd);
 		void CleanupDeviceD3D();
+		void CreateRenderTarget();
+		void CleanupRenderTarget();
 		FrameContext* WaitForNextFrameResources();
 
 	public:
@@ -123,5 +130,9 @@ namespace IHA::Engine {
 		Renderer*						m_renderer;
 		SceneGraph*						m_sceneGraph;
 		ResourceManager*				m_resourceManager;
+
+		/* Cyclable Modules */
+		std::vector<ICyclable*>			m_cyclables;
+		World*							m_world;
 	};
 }

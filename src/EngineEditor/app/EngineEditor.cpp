@@ -41,6 +41,11 @@ namespace IHA::Editor {
         m_engineCore->Present();
     }
 
+    void EngineEditor::Resize(LPARAM lParam)
+    {
+        m_engineCore->Resize(lParam);
+    }
+
     void EngineEditor::Update()
     {
         ImGui_ImplDX12_NewFrame();
@@ -152,10 +157,6 @@ namespace IHA::Editor {
         g_Windows.push_back(std::make_unique<ConsoleWindow>(IHA::WINDOW_NAME_CONSOLE));
         g_Windows.push_back(std::make_unique<HierarchyWindow>(IHA::WINDOW_NAME_HIERARCHY));
         g_Windows.push_back(std::make_unique<InspectorWindow>(IHA::WINDOW_NAME_INSPECTOR));
-
-        g_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_CommandAllocator));
-        g_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_CommandList));
-        m_CommandList->Close();
     }
 
     void EngineEditor::DrawMainMenuBar()

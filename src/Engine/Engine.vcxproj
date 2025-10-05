@@ -142,13 +142,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common\Logger.h" />
+    <ClInclude Include="Core\ECS.h" />
+    <ClInclude Include="Core\Renderer.h" />
+    <ClInclude Include="Core\ResourceManager.h" />
+    <ClInclude Include="Core\World.h" />
     <ClInclude Include="EngineCore.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Renderers\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\Logger.cpp" />
+    <ClCompile Include="Core\ECS.cpp" />
+    <ClCompile Include="Core\Renderer.cpp" />
+    <ClCompile Include="Core\ResourceManager.cpp" />
+    <ClCompile Include="Core\World.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="EngineCore.cpp" />
     <ClCompile Include="pch.cpp">
@@ -157,7 +164,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Renderers\Renderer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
