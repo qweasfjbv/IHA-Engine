@@ -110,7 +110,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,13 +155,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\EngineEditor.h" />
-    <ClInclude Include="app\framework.h" />
     <ClInclude Include="app\resource.h" />
     <ClInclude Include="app\Scene.h" />
-    <ClInclude Include="app\targetver.h" />
-    <ClInclude Include="app\thirdparty.h" />
+    <ClInclude Include="framework.h" />
     <ClInclude Include="Structs\Buffers.h" />
     <ClInclude Include="Structs\Material.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="thirdparty.h" />
     <ClInclude Include="Utils\constants.h" />
     <ClInclude Include="Utils\enums.h" />
     <ClInclude Include="Windows\ConsoleWindow.h" />

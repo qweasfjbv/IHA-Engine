@@ -9,7 +9,7 @@ namespace IHA::Editor {
 
 	ConsoleWindow::~ConsoleWindow() {}
 
-	void ConsoleWindow::OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	void ConsoleWindow::OnGUI() {
 
 		ImGui::Text(u8"콘솔창 텍스트");
 

@@ -7,14 +7,15 @@ namespace IHA::Engine {
 	void Logger::Init()
 	{
 		AllocConsole();
-		freopen("CONOUT$", "w", stdout);
+		FILE* fp;
+		freopen_s(&fp, "CONOUT$", "w", stdout);
 	}
 	void Logger::Shutdown()
 	{
 		FreeConsole();
 	}
 
-	void Logger::Log(LogLevel level, const std::string message)
+	void Logger::Log(const std::string message, LogLevel logLevel)
 	{
 		// HACK
 		std::cout << message << '\n';

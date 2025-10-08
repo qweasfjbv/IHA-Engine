@@ -9,7 +9,7 @@ namespace IHA::Editor {
 
 	InspectorWindow::~InspectorWindow() {}
 
-	void InspectorWindow::OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	void InspectorWindow::OnGUI() {
 
 		ImGui::Text(u8"인스펙터창 텍스트");
 

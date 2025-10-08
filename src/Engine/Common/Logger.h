@@ -13,7 +13,7 @@ namespace IHA::Engine {
 		static void Init();
 		static void Shutdown();
 
-		static void Log(LogLevel level, const std::string message);
+		static void Log(const std::string message, LogLevel level = LogLevel::Info);
 		static void SetOutput(std::function<void(LogLevel, const std::string&)> callback);
 	};
 }

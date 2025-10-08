@@ -6,7 +6,7 @@ namespace IHA::Editor {
 
 	WindowBase::~WindowBase() {}
 
-	void WindowBase::Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	void WindowBase::Draw() {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -16,7 +16,7 @@ namespace IHA::Editor {
 		ImGui::PopStyleVar(3);
 
 		// TODO - Check conditions (ex. visibility)
-		OnGUI(device, srvHeap);
+		OnGUI();
 		ImGui::End();
 	}
 }

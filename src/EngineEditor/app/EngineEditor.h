@@ -11,6 +11,7 @@
 
 // Project Modules
 #include "EngineCore.h"
+#include "Windows/WindowBase.h"
 
 namespace IHA::Editor {
 
@@ -33,13 +34,15 @@ namespace IHA::Editor {
         void DrawMainMenuBar();
         void DrawDockedWindows();
 
+    public:
+        inline static bool g_dockInit = false;
+        static ImVec4 clear_color;
+
     private:
 
         HWND m_hWnd = nullptr;
         IHA::Engine::EngineCore* m_engineCore = nullptr;
-        std::vector<std::unique_ptr<WindowBase>> m_Windows;
+        std::vector<std::unique_ptr<WindowBase>> m_windows;
 
-        static bool g_dockInit;
-        static ImVec4 clear_color;
     };
 }

@@ -11,7 +11,7 @@ namespace IHA::Editor {
 		~InspectorWindow();
 
 	protected:
-		void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) override;
+		void OnGUI() override;
 
 		// private:
 

@@ -15,11 +15,11 @@ namespace IHA::Editor {
         virtual void Update() {}
         virtual void Resize(unsigned int w, unsigned int h) {}
 
-        virtual void Draw(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap);
+        virtual void Draw();
 
     protected:
 
-        virtual void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) = 0;
+        virtual void OnGUI() = 0;
 
         std::string m_Name;
     };

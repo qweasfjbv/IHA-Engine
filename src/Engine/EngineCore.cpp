@@ -2,7 +2,10 @@
 #include <memory>
 #include <iostream>
 #include <cassert>
+
 #include "Core/World.h"
+#include "Core/Renderer.h"
+#include "Common/Logger.h"
 
 #ifdef DX12_ENABLE_DEBUG_LAYER
 #include <dxgidebug.h>
@@ -10,13 +13,15 @@
 #endif
 
 namespace IHA::Engine {
-
+		
 	bool EngineCore::Init(HWND hWnd)
 	{
+		Logger::Init();
 		if (!CreateDeviceD3D(hWnd)) return false;
 		CreateRenderTarget();
 	
-		m_cyclables.push_back(m_world);
+		// m_cyclables.push_back(m_world);
+		return true;
 	}
 
 	void EngineCore::Resize(LPARAM lParam)
@@ -32,14 +37,18 @@ namespace IHA::Engine {
 	{
 	}
 
-	void EngineCore::BeginFrame() 
+	void EngineCore::ResetCommands()
 	{
 		// Reset command list
+		m_swapChainOccluded = false;
 		FrameContext* frameCtx = WaitForNextFrameResources();
-		UINT backBufferIdx = m_swapChain->GetCurrentBackBufferIndex();
 		frameCtx->commandAllocator->Reset();
 		m_commandList->Reset(frameCtx->commandAllocator, nullptr);
+	}
 
+	void EngineCore::OpenBarrier()
+	{
+		UINT backBufferIdx = m_swapChain->GetCurrentBackBufferIndex();
 		// Ready resource barrier
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -51,22 +60,26 @@ namespace IHA::Engine {
 		m_commandList->ResourceBarrier(1, &barrier);
 	}
 
-	void EngineCore::EndFrame()
+	void EngineCore::CloseBarrier()
 	{
-		D3D12_RESOURCE_BARRIER barrier = {};
+		UINT backBufferIdx = m_swapChain->GetCurrentBackBufferIndex();
+		D3D12_RESOURCE_BARRIER barrier = {};		
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = m_renderTargetResources[backBufferIdx];
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 		m_commandList->ResourceBarrier(1, &barrier);
-		m_commandList->Close();
-
-		m_commandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_commandList);
 	}
 
 	void EngineCore::Update()
 	{
 		// HACK - Timer 필요
-		for (const auto& cycle : m_cyclables)
+
+		for (const auto& cycle : m_cyclables) {
 			cycle->Update(0.01f);
+		}
 	}
 
 	void EngineCore::PostUpdate()
@@ -75,16 +88,27 @@ namespace IHA::Engine {
 
 	void EngineCore::Render()
 	{
+		// HACK - 위치 view로 옮겨야됨
+		for (int i = 0; i < m_renderers.size(); i++) 
+		{
+			m_renderers[i]->Resize(1280, 720);
+			m_renderers[i]->Render(nullptr, nullptr);
+		}
 	}
 
 	void EngineCore::Present() 
 	{
+		m_commandList->Close();
+		m_commandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&m_commandList);
+
 		HRESULT hr = m_swapChain->Present(1, 0);
-		
+		m_swapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
+
 		UINT64 fenceValue = m_fenceLastSignaledValue + 1;
 		m_commandQueue->Signal(m_fence, fenceValue);
 		m_fenceLastSignaledValue = fenceValue;
-		m_frameContext[m_frameIndex % APP_NUM_FRAMES_IN_FLIGHT].fenceValue = fenceValue;
+		FrameContext* frameCtx = &m_frameContext[m_frameIndex % APP_NUM_FRAMES_IN_FLIGHT];
+		frameCtx->fenceValue = fenceValue;
 	}
 
 	void EngineCore::ShutDown()
@@ -96,7 +120,23 @@ namespace IHA::Engine {
 	bool EngineCore::IsSwapChainOccluded() 
 	{
 		if (!m_swapChain) return false;
-		return (m_swapChain->Present(0, DXGI_PRESENT_TEST) == DXGI_STATUS_OCCLUDED);
+		return m_swapChainOccluded;
+	}
+
+	Renderer* EngineCore::CreateRenderer(UINT width, UINT height)
+	{
+		DescHandles descHandles{};
+
+		// TODO - handling error cause of lack of heaps' size
+		g_rtvDescHeapAlloc->Alloc(&descHandles.m_rtvCPUDescHandle, &descHandles.m_rtvGPUDescHandle);
+		g_srvDescHeapAlloc->Alloc(&descHandles.m_srvCPUDescHandle, &descHandles.m_srvGPUDescHandle);
+		g_dsvDescHeapAlloc->Alloc(&descHandles.m_dsvCPUDescHandle, &descHandles.m_dsvGPUDescHandle);
+
+		Renderer* renderer = new Renderer(m_device, m_commandList, std::move(descHandles));
+		renderer->Resize(width, height);
+		m_renderers.push_back(renderer);
+		
+		return renderer;
 	}
 
 	bool EngineCore::CreateDeviceD3D(HWND hwnd)
@@ -150,11 +190,14 @@ namespace IHA::Engine {
 				return false;
 
 			m_rtvDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-			D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_rtvDescHeap->GetCPUDescriptorHandleForHeapStart();
+			g_rtvDescHeapAlloc = new DescriptorHeapAllocator(m_rtvDescHeap, RTV_HEAP_SIZE, m_rtvDescSize);
+
+			D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = {};
+			D3D12_GPU_DESCRIPTOR_HANDLE rtvGpuHandle = {};
 			for (UINT i = 0; i < APP_NUM_BACK_BUFFERS; i++)
 			{
-				m_renderTargetDescs[i] = rtvHandle;
-				rtvHandle.ptr += m_rtvDescSize;
+				g_rtvDescHeapAlloc->Alloc(&rtvCpuHandle, &rtvGpuHandle);
+				m_renderTargetDescs[i] = rtvCpuHandle;
 			}
 		}
 
@@ -162,12 +205,25 @@ namespace IHA::Engine {
 			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 			m_cbvSrvUavDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-			desc.NumDescriptors = APP_SRV_HEAP_SIZE;
+			desc.NumDescriptors = SRV_HEAP_SIZE;
 			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			if (m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_cbvSrvUavDescHeap)) != S_OK)
 				return false;
+		}
 
-			g_srvDescHeapAlloc = new DescriptorHeapAllocator(m_cbvSrvUavDescHeap, APP_SRV_HEAP_SIZE, m_cbvSrvUavDescSize);
+		{
+			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+			m_dsvDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+			desc.NumDescriptors = DSV_HEAP_SIZE;
+			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			if (m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_dsvDescHeap)) != S_OK)
+				return false;
+		}
+
+		{
+			g_srvDescHeapAlloc = new DescriptorHeapAllocator(m_cbvSrvUavDescHeap, SRV_HEAP_SIZE, m_cbvSrvUavDescSize);
+			g_dsvDescHeapAlloc = new DescriptorHeapAllocator(m_dsvDescHeap, DSV_HEAP_SIZE, m_dsvDescSize);
 		}
 
 		{	/* Create Command Objects */

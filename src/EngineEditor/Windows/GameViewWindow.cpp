@@ -5,21 +5,15 @@
 
 namespace IHA::Editor {
 
-	GameViewWindow::GameViewWindow(const char* name, SceneViewRenderer* renderer)
-		: WindowBase(name), m_Renderer(renderer) {}
+	GameViewWindow::GameViewWindow(const char* name, IHA::Engine::Renderer* renderer)
+		: WindowBase(name), m_renderer(renderer) {}
 
 	GameViewWindow::~GameViewWindow() {}
 
-
-	void GameViewWindow::OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	void GameViewWindow::OnGUI() {
 
 		ImVec2 size = ImGui::GetContentRegionAvail();
-		UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
-		srvHandle.ptr += IHA::SLOT_ID_GAMEVIEW * descriptorSize;
-
-		// MSVC 호환 방식
-		ImTextureID texId = (ImTextureID)(uintptr_t)(srvHandle.ptr);
+		ImTextureID texId = (ImTextureID)(uintptr_t)(m_renderer->GetSrvGpuDescHandle().ptr);
 
 		ImGui::Image(texId, size);
 	}

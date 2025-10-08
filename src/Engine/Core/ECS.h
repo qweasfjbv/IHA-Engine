@@ -7,6 +7,7 @@
 
 #include "Utils/Types.h"
 #include "Common/Interfaces.h"
+#include "Common/Logger.h"
 
 namespace IHA::Engine {
 
@@ -52,7 +53,7 @@ namespace IHA::Engine {
         template<typename T>
         ComponentPool<T>& GetPool() {
             std::type_index type = typeid(T);
-            if (!pools.contains(type))
+            if (pools.find(type) != pools.end())
                 pools[type] = std::make_shared<ComponentPool<T>>();
             return *std::static_pointer_cast<ComponentPool<T>>(pools[type]);
         }

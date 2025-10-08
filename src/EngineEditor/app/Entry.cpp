@@ -69,7 +69,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         if (g_editor != nullptr && wParam != SIZE_MINIMIZED)
         {
-
+            g_editor->Resize(lParam);
         }
         return 0;
     case WM_SYSCOMMAND:

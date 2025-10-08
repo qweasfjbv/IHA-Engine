@@ -1,22 +1,21 @@
 #pragma once
 
 #include "WindowBase.h"
-#include "Renderers/SceneViewRenderer.h"
 #include "Utils/constants.h"
+#include "Core/Renderer.h"
 
 namespace IHA::Editor {
 
 	class GameViewWindow : public WindowBase {
 
 	public:
-		GameViewWindow(const char* name, SceneViewRenderer* renderer);
+		GameViewWindow(const char* name, IHA::Engine::Renderer* renderer);
 		~GameViewWindow();
 
 	protected:
-		void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) override;
+		void OnGUI() override;
 
 	private:
-		// HACK - 나중에 GameViewRenderer로 교체 필요
-		SceneViewRenderer* m_Renderer;
+		IHA::Engine::Renderer* m_renderer;
 	};
 }

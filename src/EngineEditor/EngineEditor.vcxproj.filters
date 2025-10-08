@@ -78,16 +78,7 @@
     <ClInclude Include="app\EngineEditor.h">
       <Filter>헤더 파일\app</Filter>
     </ClInclude>
-    <ClInclude Include="app\framework.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
     <ClInclude Include="app\resource.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="app\targetver.h">
-      <Filter>헤더 파일\app</Filter>
-    </ClInclude>
-    <ClInclude Include="app\thirdparty.h">
       <Filter>헤더 파일\app</Filter>
     </ClInclude>
     <ClInclude Include="Windows\SceneViewWindow.h">
@@ -122,6 +113,15 @@
     </ClInclude>
     <ClInclude Include="Structs\Material.h">
       <Filter>헤더 파일\Structs</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty.h">
+      <Filter>헤더 파일\app</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>헤더 파일\app</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

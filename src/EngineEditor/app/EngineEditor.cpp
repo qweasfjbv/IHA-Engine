@@ -1,5 +1,9 @@
 ﻿#include "EngineEditor.h"
 
+#include "Core/Renderer.h"
+
+#include "Common/Logger.h"
+
 // Windows
 #include "Windows/SceneViewWindow.h"
 #include "Windows/GameViewWindow.h"
@@ -11,33 +15,46 @@
 #include "Utils/constants.h"
 #include "Utils/Enums.h"
 
+
 using namespace IHA::Engine;
 
 namespace IHA::Editor {
 
+    ImVec4 EngineEditor::clear_color{};
+
     bool EngineEditor::Init(HWND hWnd)
     {
-        m_engineCore = new IHA::Engine::EngineCore();
+        m_engineCore = new EngineCore();
         if (!m_engineCore->Init(hWnd)) return false;
         if (!InitImGUI(hWnd)) return false;
 
         m_hWnd = hWnd;
         InitDockedWindows();
 
-
         return true;
     }
 
     void EngineEditor::MainLoop()
     {
-        m_engineCore->BeginFrame();
-        m_engineCore->PreUpdate();
-        m_engineCore->Update();
+        m_engineCore->ResetCommands();
+        // m_engineCore->PreUpdate();
+        // m_engineCore->Update();
         Update();
-        m_engineCore->PostUpdate();
-        m_engineCore->Render();
+
+        ImGui::Render();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+
+        m_engineCore->OpenBarrier();
         Render();
-        m_engineCore->EndFrame();
+        m_engineCore->CloseBarrier();
+        
+        // m_engineCore->PostUpdate();
+
         m_engineCore->Present();
     }
 
@@ -53,30 +70,25 @@ namespace IHA::Editor {
         ImGui::NewFrame();
 
         DrawMainMenuBar();
+
+        m_engineCore->Render();
         DrawDockedWindows();
     }
 
     void EngineEditor::Render()
     {
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-        }
-
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-        auto* cmd = m_engineCore->GetCommandList();
-        auto backBufferIdx = m_engineCore->GetSwapChain()->GetCurrentBackBufferIndex();
+        UINT backBufferIdx = m_engineCore->GetSwapChain()->GetCurrentBackBufferIndex();
         auto rtvHandle = m_engineCore->GetMainRTVHandle(backBufferIdx);
+        auto cmd = m_engineCore->GetCommandList();
 
         cmd->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, nullptr);
-        cmd->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr); 
-        
+        cmd->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
         ID3D12DescriptorHeap* heaps[] = { m_engineCore->GetSrvDescHeap() };
         cmd->SetDescriptorHeaps(1, heaps);
-        ImGui::Render();
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmd);
+        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_engineCore->GetCommandList());
     }
 
     void EngineEditor::ShutDown()
@@ -115,11 +127,10 @@ namespace IHA::Editor {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
         ImGui::StyleColorsDark();
 
         ImGuiStyle& style = ImGui::GetStyle();
-        UINT main_scale = GetDpiForWindow(hwnd);
+        UINT main_scale = GetDpiForWindow(hwnd) / 96.0f;    // NOTE: Devide by default DPI
         style.ScaleAllSizes(main_scale);
         style.FontScaleDpi = main_scale;
 
@@ -149,14 +160,13 @@ namespace IHA::Editor {
 
     void EngineEditor::InitDockedWindows()
     {
-        g_SceneViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
-        g_GameViewRenderer = std::make_unique<SceneViewRenderer>(g_pd3dDevice, 1280, 720);
-
-        g_Windows.push_back(std::make_unique<SceneViewWindow>(IHA::WINDOW_NAME_SCENEVIEW, g_SceneViewRenderer.get()));
-        g_Windows.push_back(std::make_unique<GameViewWindow>(IHA::WINDOW_NAME_GAMEVIEW, g_GameViewRenderer.get()));
-        g_Windows.push_back(std::make_unique<ConsoleWindow>(IHA::WINDOW_NAME_CONSOLE));
-        g_Windows.push_back(std::make_unique<HierarchyWindow>(IHA::WINDOW_NAME_HIERARCHY));
-        g_Windows.push_back(std::make_unique<InspectorWindow>(IHA::WINDOW_NAME_INSPECTOR));
+        Renderer* sceneRenderer = m_engineCore->CreateRenderer(1280, 720);
+        Renderer* gameRenderer = m_engineCore->CreateRenderer(1280, 720);
+        m_windows.push_back(std::make_unique<SceneViewWindow>(IHA::WINDOW_NAME_SCENEVIEW, sceneRenderer));
+        m_windows.push_back(std::make_unique<GameViewWindow>(IHA::WINDOW_NAME_GAMEVIEW, gameRenderer));
+        m_windows.push_back(std::make_unique<ConsoleWindow>(IHA::WINDOW_NAME_CONSOLE));
+        m_windows.push_back(std::make_unique<HierarchyWindow>(IHA::WINDOW_NAME_HIERARCHY));
+        m_windows.push_back(std::make_unique<InspectorWindow>(IHA::WINDOW_NAME_INSPECTOR));
     }
 
     void EngineEditor::DrawMainMenuBar()
@@ -204,19 +214,10 @@ namespace IHA::Editor {
         ImGui::DockSpace(dockspace_id, ImVec2(.0f, .0f), ImGuiDockNodeFlags_PassthruCentralNode);
         ImGui::End();
 
-        // Render Textures
-        g_SceneViewRenderer->Resize(g_pd3dDevice, 1280, 720);
-        g_SceneViewRenderer->Render(g_pd3dCommandList);
-        g_SceneViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, IHA::SLOT_ID_SCENEVIEW);
-
-        g_GameViewRenderer->Resize(g_pd3dDevice, 1280, 720);
-        g_GameViewRenderer->Render(g_pd3dCommandList);
-        g_GameViewRenderer->CopySRVToHeap(g_pd3dDevice, g_pd3dSrvDescHeap, IHA::SLOT_ID_GAMEVIEW);
-
-
         // OnGUI
-        for (auto& window : g_Windows)
-            window->Draw(g_pd3dDevice, g_pd3dSrvDescHeap);
+        for (auto& window : m_windows) {
+            window->Draw();
+        }
 
         if (!g_dockInit) {
             g_dockInit = true;

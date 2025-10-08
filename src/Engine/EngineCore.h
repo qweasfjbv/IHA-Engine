@@ -1,6 +1,10 @@
 #include <vector>
+#include <iostream>
+#include <string>
+#include <cassert>
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <Common/Logger.h>
 
 
 namespace IHA::Engine {
@@ -10,7 +14,6 @@ namespace IHA::Engine {
 	class SceneGraph;
 	class ResourceManager;
 	class World;
-
 	struct ICyclable;
 
 	struct FrameContext
@@ -19,34 +22,49 @@ namespace IHA::Engine {
 		UINT64                      fenceValue;
 	};
 
-	struct DescriptorHeapAllocator
+	class DescriptorHeapAllocator
 	{
 	public:
-		DescriptorHeapAllocator(ID3D12DescriptorHeap* heap, UINT size, UINT descSize)
-			: m_heap(heap), m_size(size), m_nextFree(0), m_descriptorSize(descSize) {}
-
-		void Alloc(D3D12_CPU_DESCRIPTOR_HANDLE* outCpu, D3D12_GPU_DESCRIPTOR_HANDLE* outGpu)
+		DescriptorHeapAllocator(ID3D12DescriptorHeap* heap, UINT heapSize, UINT incrementSize)
+			: m_heap(heap), m_heapHandleIncrement(incrementSize), m_heapSize(heapSize)
 		{
-			// if (m_nextFree >= m_size) return false;
-
-			outCpu->ptr = m_heap->GetCPUDescriptorHandleForHeapStart().ptr + m_nextFree * m_descriptorSize;
-			outGpu->ptr = m_heap->GetGPUDescriptorHandleForHeapStart().ptr + static_cast<UINT64>(m_nextFree) * m_descriptorSize;
-
-			++m_nextFree;
-			// return true;
+			assert(m_heap != nullptr);
+			D3D12_DESCRIPTOR_HEAP_DESC desc = heap->GetDesc();
+			m_heapStartCpu = m_heap->GetCPUDescriptorHandleForHeapStart();
+			m_heapStartGpu = m_heap->GetGPUDescriptorHandleForHeapStart();
+			m_freeIndices.reserve((int)heapSize);
+			for (int n = heapSize; n > 0; n--)
+				m_freeIndices.push_back(n - 1);
 		}
-
-		void Free(D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu)
+		~DescriptorHeapAllocator()
 		{
-			if (m_nextFree > 0) --m_nextFree;
-			// return true;
+			m_heap = nullptr;
+			m_freeIndices.clear();
+		}
+		void Alloc(D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_desc_handle)
+		{
+			assert(m_freeIndices.size() > 0);
+			int idx = m_freeIndices.back();
+			m_freeIndices.pop_back();
+			Logger::Log("ALLOC : " +  std::to_string(idx));
+			out_cpu_desc_handle->ptr = m_heapStartCpu.ptr + (idx * m_heapHandleIncrement);
+			out_gpu_desc_handle->ptr = m_heapStartGpu.ptr + (idx * m_heapHandleIncrement);
+		}
+		void Free(D3D12_CPU_DESCRIPTOR_HANDLE out_cpu_desc_handle, D3D12_GPU_DESCRIPTOR_HANDLE out_gpu_desc_handle)
+		{
+			int cpu_idx = (int)((out_cpu_desc_handle.ptr - m_heapStartCpu.ptr) / m_heapHandleIncrement);
+			int gpu_idx = (int)((out_gpu_desc_handle.ptr - m_heapStartGpu.ptr) / m_heapHandleIncrement);
+
+			m_freeIndices.push_back(cpu_idx);
 		}
 
 	private:
-		ID3D12DescriptorHeap* m_heap;
-		UINT m_size;
-		UINT m_nextFree;
-		UINT m_descriptorSize = 0;
+		ID3D12DescriptorHeap*		m_heap = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE m_heapStartCpu;
+		D3D12_GPU_DESCRIPTOR_HANDLE m_heapStartGpu;
+		UINT                        m_heapHandleIncrement;
+		UINT						m_heapSize;
+		std::vector<int>            m_freeIndices;
 	};
 
 	class EngineCore {
@@ -56,16 +74,20 @@ namespace IHA::Engine {
 		void Resize(LPARAM lParam);
 		void ShutDown();
 
-		void BeginFrame();
+		void ResetCommands();
+		void OpenBarrier();
+		void CloseBarrier();
+
 		void PreUpdate();
 		void Update();
 		void PostUpdate();
 		void Render();
-		void EndFrame();
 		void Present();
 
 		void WaitForLastSubmittedFrame();
 		bool IsSwapChainOccluded();
+
+		Renderer* CreateRenderer(UINT width, UINT height);
 
 	private:
 		bool CreateDeviceD3D(HWND hwnd);
@@ -85,15 +107,19 @@ namespace IHA::Engine {
 			return m_renderTargetDescs[backBufferIndex];
 		}
 
-		FORCEINLINE Renderer* GetRenderer() const { return m_renderer; }
 		FORCEINLINE SceneGraph* GetScene() const { return m_sceneGraph; }
 		FORCEINLINE ResourceManager* GetResourceManager() const { return m_resourceManager; }
 
 		static const int APP_NUM_FRAMES_IN_FLIGHT = 2;
 		static const int APP_NUM_BACK_BUFFERS = 2;
-		static const int APP_SRV_HEAP_SIZE = 64;
 
-		static DescriptorHeapAllocator* g_srvDescHeapAlloc;
+		static const int SRV_HEAP_SIZE = 16;
+		static const int RTV_HEAP_SIZE = 16;
+		static const int DSV_HEAP_SIZE = 16;
+
+		inline static DescriptorHeapAllocator* g_srvDescHeapAlloc = nullptr;
+		inline static DescriptorHeapAllocator* g_rtvDescHeapAlloc = nullptr;
+		inline static DescriptorHeapAllocator* g_dsvDescHeapAlloc = nullptr;
 
 	private:
 
@@ -127,12 +153,14 @@ namespace IHA::Engine {
 
 
 		/* Engine Modules */
-		Renderer*						m_renderer;
+		std::vector<Renderer*>			m_renderers;
 		SceneGraph*						m_sceneGraph;
 		ResourceManager*				m_resourceManager;
 
 		/* Cyclable Modules */
 		std::vector<ICyclable*>			m_cyclables;
 		World*							m_world;
+		
+		bool m_swapChainOccluded = false;
 	};
 }

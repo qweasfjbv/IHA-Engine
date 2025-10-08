@@ -1,21 +1,21 @@
 #pragma once
 
 #include "WindowBase.h"
-#include "Renderers/Renderer.h"
 #include "Utils/constants.h"
+#include "Core/Renderer.h"
 
 namespace IHA::Editor {
 
 	class SceneViewWindow : public WindowBase {
 
 	public:
-		SceneViewWindow(const char* name, Renderer* renderer);
+		SceneViewWindow(const char* name, IHA::Engine::Renderer* renderer);
 		~SceneViewWindow();
 
 	protected:
-		void OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) override;
+		void OnGUI() override;
 
 	private:
-		Renderer* m_Renderer;
+		IHA::Engine::Renderer* m_renderer;
 	};
 }

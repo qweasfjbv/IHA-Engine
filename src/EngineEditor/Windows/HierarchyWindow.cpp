@@ -9,7 +9,7 @@ namespace IHA::Editor {
 
 	HierarchyWindow::~HierarchyWindow() {}
 
-	void HierarchyWindow::OnGUI(ID3D12Device* device, ID3D12DescriptorHeap* srvHeap) {
+	void HierarchyWindow::OnGUI() {
 
 		ImGui::Text(u8"계층창 텍스트");
 

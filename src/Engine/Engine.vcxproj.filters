@@ -25,8 +25,11 @@
     <Filter Include="헤더 파일\Core">
       <UniqueIdentifier>{b15703a0-d63b-4ae4-b076-a529e1b2e39c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Utils">
-      <UniqueIdentifier>{3ac78943-56af-4194-9859-6147f98b1bdd}</UniqueIdentifier>
+    <Filter Include="소스 파일\Components">
+      <UniqueIdentifier>{86e3d8b3-0b50-47dd-9d1f-7525ac9b50ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Components">
+      <UniqueIdentifier>{0949944c-94ac-4e6a-be17-b28c6e1f92f4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +57,9 @@
     <ClInclude Include="Core\World.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Components\Camera.h">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -79,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="Core\World.cpp">
       <Filter>소스 파일\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Camera.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

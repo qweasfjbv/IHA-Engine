@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)src\Engine\;$(SolutionDir)src\StaticThirdParty\</AdditionalIncludeDirectories>
@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common\Logger.h" />
+    <ClInclude Include="Components\Camera.h" />
     <ClInclude Include="Core\ECS.h" />
     <ClInclude Include="Core\Renderer.h" />
     <ClInclude Include="Core\ResourceManager.h" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\Logger.cpp" />
+    <ClCompile Include="Components\Camera.cpp" />
     <ClCompile Include="Core\ECS.cpp" />
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\ResourceManager.cpp" />
