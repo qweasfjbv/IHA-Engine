@@ -46,7 +46,6 @@ namespace IHA::Engine {
 			assert(m_freeIndices.size() > 0);
 			int idx = m_freeIndices.back();
 			m_freeIndices.pop_back();
-			Logger::Log("ALLOC : " +  std::to_string(idx));
 			out_cpu_desc_handle->ptr = m_heapStartCpu.ptr + (idx * m_heapHandleIncrement);
 			out_gpu_desc_handle->ptr = m_heapStartGpu.ptr + (idx * m_heapHandleIncrement);
 		}

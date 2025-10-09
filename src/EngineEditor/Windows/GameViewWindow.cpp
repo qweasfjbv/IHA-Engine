@@ -12,6 +12,9 @@ namespace IHA::Editor {
 
 	void GameViewWindow::OnGUI() {
 
+		m_renderer->Resize(1280, 720);
+		m_renderer->Render(nullptr, nullptr);
+
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		ImTextureID texId = (ImTextureID)(uintptr_t)(m_renderer->GetSrvGpuDescHandle().ptr);
 

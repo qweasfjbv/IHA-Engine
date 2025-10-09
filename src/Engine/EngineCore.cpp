@@ -88,12 +88,7 @@ namespace IHA::Engine {
 
 	void EngineCore::Render()
 	{
-		// HACK - 위치 view로 옮겨야됨
-		for (int i = 0; i < m_renderers.size(); i++) 
-		{
-			m_renderers[i]->Resize(1280, 720);
-			m_renderers[i]->Render(nullptr, nullptr);
-		}
+
 	}
 
 	void EngineCore::Present() 
@@ -183,7 +178,7 @@ namespace IHA::Engine {
 		{	/* Create RTV Heap */
 			D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			desc.NumDescriptors = APP_NUM_BACK_BUFFERS;
+			desc.NumDescriptors = RTV_HEAP_SIZE;
 			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 			desc.NodeMask = 1;
 			if (m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_rtvDescHeap)) != S_OK)

@@ -38,8 +38,8 @@ namespace IHA::Engine {
         ID3D12Resource*             m_renderTexture = nullptr;
         DescHandles                 m_descHandles = {};
 
-        UINT                        m_width = 1280;
-        UINT                        m_height = 720;
+        UINT                        m_width = 0;
+        UINT                        m_height = 0;
     };
 
 }

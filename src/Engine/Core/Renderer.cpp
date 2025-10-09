@@ -46,6 +46,7 @@ namespace IHA::Engine {
             &clearValue,
             IID_PPV_ARGS(&m_renderTexture));
 
+        assert(m_renderTexture != nullptr);
         if (FAILED(hr)) {
             Logger::Log("Renderer Create Resource Failed");
             return;
@@ -63,7 +64,6 @@ namespace IHA::Engine {
 
     void Renderer::Render(World* world, Camera* camera)
 	{
-
         D3D12_RESOURCE_BARRIER rtBarrier = {};
         rtBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         rtBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

@@ -37,9 +37,11 @@ namespace IHA::Editor {
     void EngineEditor::MainLoop()
     {
         m_engineCore->ResetCommands();
-        // m_engineCore->PreUpdate();
-        // m_engineCore->Update();
+
+        m_engineCore->PreUpdate();
+        m_engineCore->Update();
         Update();
+        m_engineCore->PostUpdate();
 
         ImGui::Render();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -53,8 +55,6 @@ namespace IHA::Editor {
         Render();
         m_engineCore->CloseBarrier();
         
-        // m_engineCore->PostUpdate();
-
         m_engineCore->Present();
     }
 
@@ -70,8 +70,6 @@ namespace IHA::Editor {
         ImGui::NewFrame();
 
         DrawMainMenuBar();
-
-        m_engineCore->Render();
         DrawDockedWindows();
     }
 
@@ -88,6 +86,7 @@ namespace IHA::Editor {
 
         ID3D12DescriptorHeap* heaps[] = { m_engineCore->GetSrvDescHeap() };
         cmd->SetDescriptorHeaps(1, heaps);
+
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_engineCore->GetCommandList());
     }
 
@@ -244,7 +243,6 @@ namespace IHA::Editor {
             ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_CONSOLE, dock_center_bottom);
             ImGui::DockBuilderDockWindow(IHA::WINDOW_NAME_INSPECTOR, dock_right_panel);
 
-            // 완료
             ImGui::DockBuilderFinish(dockspace_id);
         }
 
