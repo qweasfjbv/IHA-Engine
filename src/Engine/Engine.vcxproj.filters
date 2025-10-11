@@ -31,6 +31,12 @@
     <Filter Include="헤더 파일\Components">
       <UniqueIdentifier>{0949944c-94ac-4e6a-be17-b28c6e1f92f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Render">
+      <UniqueIdentifier>{86dcfdad-1d7a-4598-bd1f-4cfa760d4fb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Render">
+      <UniqueIdentifier>{6d01ca92-e219-4fa5-986d-add877a1026a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -60,6 +66,24 @@
     <ClInclude Include="Components\Camera.h">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Components\Transform.h">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\MathHelper.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Interfaces.h">
+      <Filter>헤더 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\MeshRenderer.h">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Material.h">
+      <Filter>헤더 파일\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Mesh.h">
+      <Filter>헤더 파일\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -88,6 +112,18 @@
     </ClCompile>
     <ClCompile Include="Components\Camera.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Transform.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\MeshRenderer.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Material.cpp">
+      <Filter>소스 파일\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Mesh.cpp">
+      <Filter>소스 파일\Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

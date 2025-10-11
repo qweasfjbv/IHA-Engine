@@ -11,33 +11,24 @@
 
 namespace IHA::Engine {
 
-	class Component : public ICyclable
-	{
-	public:
-		virtual ~Component() = default;
-	};
-
-    class SystemBase
-    {
-    public:
-        virtual ~SystemBase() = default;
-        virtual void Update(float deltaTime) = 0;
-    };
+    struct Component { };
 
     template<typename T>
-	class ComponentPool : public ICyclable {
+	class SystemBase : public ICyclable {
         static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
 
     public:
+        virtual ~SystemBase() noexcept = default;
         void Add(Entity e, const T& c) { m_data[e] = c; }
         bool Has(Entity e) const { return m_data.find(e) != m_data.end(); }
         T& Get(Entity e) { return m_data.at(e); }
-
-        void Update(float deltaTime) override {
-            for (auto& [entity, comp] : m_data) {
-                comp.Update(deltaTime);
-            }
+        T* TryGet(Entity e) {
+            auto it = m_data.find(e);
+            return it != m_data.end() ? &it->second : nullptr;
         }
+
+        void Update(float deltaTime) override { };
+
     private:
         std::unordered_map<Entity, T> m_data;
 	};
@@ -48,14 +39,14 @@ namespace IHA::Engine {
         Entity CreateEntity() { return g_nextEntityId++; }
     };
 
-    class ComponentManager : public ICyclable {
+    class SystemManager : public ICyclable {
     public:
         template<typename T>
-        ComponentPool<T>& GetPool() {
+        SystemBase<T>& GetPool() {
             std::type_index type = typeid(T);
             if (pools.find(type) != pools.end())
-                pools[type] = std::make_shared<ComponentPool<T>>();
-            return *std::static_pointer_cast<ComponentPool<T>>(pools[type]);
+                pools[type] = std::make_shared<SystemBase<T>>();
+            return *std::static_pointer_cast<SystemBase<T>>(pools[type]);
         }
 
         template<typename T>
@@ -71,6 +62,11 @@ namespace IHA::Engine {
         template<typename T>
         T& GetComponent(Entity e) {
             return GetPool<T>().Get(e);
+        }
+
+        template<typename T>
+        T* TryGetComponent(Entity e) {
+            return GetPool<T>().TryGet(e);
         }
 
         void Update(float deltaTime) override {

@@ -6,7 +6,7 @@ namespace IHA::Engine {
 
     class World : public ICyclable {
         EntityManager entityMgr;
-        ComponentManager compMgr;
+        SystemManager compMgr;
     public:
         Entity CreateEntity() { return entityMgr.CreateEntity(); }
 

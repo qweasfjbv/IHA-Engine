@@ -4,12 +4,7 @@
 
 namespace IHA::Engine 
 {
-	class Camera : public Component {
-
-	public:
-		void Update(float deltaTime) override;
-
-	private:
+	struct Camera : public Component {
 
 	};
 

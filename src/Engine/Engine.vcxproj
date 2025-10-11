@@ -141,8 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Interfaces.h" />
     <ClInclude Include="Common\Logger.h" />
+    <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Components\Camera.h" />
+    <ClInclude Include="Components\MeshRenderer.h" />
+    <ClInclude Include="Components\Transform.h" />
     <ClInclude Include="Core\ECS.h" />
     <ClInclude Include="Core\Renderer.h" />
     <ClInclude Include="Core\ResourceManager.h" />
@@ -150,10 +154,14 @@
     <ClInclude Include="EngineCore.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Render\Material.h" />
+    <ClInclude Include="Render\Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\Logger.cpp" />
     <ClCompile Include="Components\Camera.cpp" />
+    <ClCompile Include="Components\MeshRenderer.cpp" />
+    <ClCompile Include="Components\Transform.cpp" />
     <ClCompile Include="Core\ECS.cpp" />
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\ResourceManager.cpp" />
@@ -166,6 +174,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Render\Material.cpp" />
+    <ClCompile Include="Render\Mesh.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,6 @@
 ﻿#include "EngineEditor.h"
 
 #include "Core/Renderer.h"
-
 #include "Common/Logger.h"
 
 // Windows
