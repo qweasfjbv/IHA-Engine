@@ -156,6 +156,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Render\Mesh.h" />
+    <ClInclude Include="Utils\Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\Logger.cpp" />

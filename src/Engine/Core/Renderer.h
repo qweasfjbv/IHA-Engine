@@ -27,7 +27,7 @@ namespace IHA::Engine {
         };
 
         void Resize(UINT width, UINT height);
-        void Render(World* world, Camera* camera);
+        void Render(World* world);
 
         FORCEINLINE D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCpuDescHandle() const { return m_descHandles.m_rtvCPUDescHandle; }
         FORCEINLINE D3D12_GPU_DESCRIPTOR_HANDLE GetSrvGpuDescHandle() const { return m_descHandles.m_srvGPUDescHandle; }

@@ -37,6 +37,9 @@
     <Filter Include="헤더 파일\Render">
       <UniqueIdentifier>{6d01ca92-e219-4fa5-986d-add877a1026a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Utils">
+      <UniqueIdentifier>{754625d5-5d05-4764-82c1-ef79b473bebd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -83,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="Render\Mesh.h">
       <Filter>헤더 파일\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Types.h">
+      <Filter>헤더 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

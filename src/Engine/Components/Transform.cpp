@@ -9,7 +9,7 @@ namespace IHA::Engine
 	void TrasnformSystem::SetParent(Entity child, Entity parent)
 	{
 		if (!IsValid(child)) {
-			Logger::Log("[Transform] - Child Entity is Invalid", LogLevel::Error);
+			LOG_ERROR("Child Entity is Invalid");
 			return;
 		}
 		

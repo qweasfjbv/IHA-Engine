@@ -48,7 +48,7 @@ namespace IHA::Engine {
 
         assert(m_renderTexture != nullptr);
         if (FAILED(hr)) {
-            Logger::Log("Renderer Create Resource Failed");
+            LOG_INFO("Renderer Create Resource Failed");
             return;
         }
 
@@ -62,7 +62,7 @@ namespace IHA::Engine {
         m_device->CreateShaderResourceView(m_renderTexture, &srvViewDesc, m_descHandles.m_srvCPUDescHandle);
     }
 
-    void Renderer::Render(World* world, Camera* camera)
+    void Renderer::Render(World* world)
 	{
         D3D12_RESOURCE_BARRIER rtBarrier = {};
         rtBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;

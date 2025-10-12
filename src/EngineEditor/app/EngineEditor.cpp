@@ -30,6 +30,8 @@ namespace IHA::Editor {
         m_hWnd = hWnd;
         InitDockedWindows();
 
+        LOG_INFO("Init Success");
+
         return true;
     }
 
