@@ -156,6 +156,8 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Render\Material.h" />
     <ClInclude Include="Render\Mesh.h" />
+    <ClInclude Include="Render\Shader.h" />
+    <ClInclude Include="Render\Texture.h" />
     <ClInclude Include="Utils\Types.h" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +179,8 @@
     </ClCompile>
     <ClCompile Include="Render\Material.cpp" />
     <ClCompile Include="Render\Mesh.cpp" />
+    <ClCompile Include="Render\Shader.cpp" />
+    <ClCompile Include="Render\Texture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

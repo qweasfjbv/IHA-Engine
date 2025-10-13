@@ -60,7 +60,7 @@ namespace IHA::Engine {
                 D3D12_RESOURCE_STATE_COPY_DEST,
                 nullptr,
                 IID_PPV_ARGS(&m_vertexBufferGPU));
-            if (FAILED(hr)) Logger::Log("Failed to create vertex buffer (GPU)", LogLevel::Error);
+            if (FAILED(hr)) LOG_ERROR("Failed to create vertex buffer (GPU)");
 
             hr = dev->CreateCommittedResource(
                 &uploadHeapProps,
@@ -69,7 +69,7 @@ namespace IHA::Engine {
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
                 IID_PPV_ARGS(&m_vertexBufferUploader));
-            if (FAILED(hr)) Logger::Log("Failed to create vertex buffer (Upload)", LogLevel::Error);
+            if (FAILED(hr)) LOG_ERROR("Failed to create vertex buffer (Upload)");
 
             void* mappedData = nullptr;
             D3D12_RANGE range = { 0, 0 };
@@ -89,7 +89,7 @@ namespace IHA::Engine {
                 D3D12_RESOURCE_STATE_COPY_DEST,
                 nullptr,
                 IID_PPV_ARGS(&m_indexBufferGPU));
-            if (FAILED(hr)) Logger::Log("Failed to create index buffer (GPU)", LogLevel::Error);
+            if (FAILED(hr)) LOG_ERROR("Failed to create index buffer (GPU)");
 
             hr = dev->CreateCommittedResource(
                 &uploadHeapProps,
@@ -98,7 +98,7 @@ namespace IHA::Engine {
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
                 IID_PPV_ARGS(&m_indexBufferUploader));
-            if (FAILED(hr)) Logger::Log("Failed to create index buffer(Upload)", LogLevel::Error);
+            if (FAILED(hr)) LOG_ERROR("Failed to create index buffer(Upload)");
 
             m_indexBufferUploader->Map(0, &range, &mappedData);
             memcpy(mappedData, indices.data(), ibByteSize);
