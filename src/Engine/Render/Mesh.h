@@ -131,9 +131,11 @@ namespace IHA::Engine {
             m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
         }
 
-        void Draw(ID3D12GraphicsCommandList* cmd) const {
+        void Bind(ID3D12GraphicsCommandList* cmd) const {
             cmd->IASetVertexBuffers(0, 1, &m_vertexBufferView);
             cmd->IASetIndexBuffer(&m_indexBufferView);
+        }
+        void Draw(ID3D12GraphicsCommandList* cmd) const {
             cmd->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
         }
 

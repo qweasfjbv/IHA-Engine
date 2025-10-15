@@ -16,7 +16,9 @@ namespace IHA::Engine {
         D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
         std::wstring name;
 
-        bool LoadFromFile(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd);
+        bool LoadFromFile(const std::wstring& filePath, ID3D12Device* device,
+            ID3D12GraphicsCommandList* cmd, ID3D12DescriptorHeap* srvHeap, UINT descriptorIndex);
+
         void Bind(ID3D12GraphicsCommandList* cmd, UINT rootParamIndex);
     };
 }
