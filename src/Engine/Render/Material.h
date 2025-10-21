@@ -8,8 +8,14 @@ namespace IHA::Engine {
     class Material {
     public:
         Shader* shader = nullptr;            
-        std::vector<Texture*> textures;      
+        Texture* texture = nullptr;      
         ComPtr<ID3D12DescriptorHeap> cbvSrvHeap;
-        XMFLOAT4 colorTint = { 1,1,1,1 };       
+        XMFLOAT4 colorTint = { 1,1,1,1 };
+
+        void Bind(ID3D12GraphicsCommandList* cmd) {
+            shader->Bind(cmd);
+            // HACK
+            texture->Bind(cmd, 1);
+        }
     };
 }

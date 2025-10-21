@@ -5,7 +5,6 @@
 #include <string>
 
 using Microsoft::WRL::ComPtr;
-using namespace DirectX;
 
 namespace IHA::Engine {
 

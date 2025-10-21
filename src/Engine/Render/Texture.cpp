@@ -6,6 +6,12 @@
 
 namespace IHA::Engine {
 
+    UINT64 GetRequiredIntermediateSize_Manual(
+        ID3D12Device* device,
+        ID3D12Resource* resource,
+        UINT firstSubresource,
+        UINT numSubresources);
+
     bool Texture::LoadFromFile(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12DescriptorHeap* srvHeap, UINT descriptorIndex)
     {
         HRESULT hr;

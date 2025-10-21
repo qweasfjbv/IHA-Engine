@@ -12,6 +12,9 @@ namespace IHA::Engine
 	};
 
 	class MeshRendererSystem : public SystemBase<MeshRenderer> {
-
+		void Update(float deltaTime) override;
+		
+	private:
+		ID3D12GraphicsCommandList* m_commandList = nullptr;
 	};
 }

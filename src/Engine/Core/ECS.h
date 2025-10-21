@@ -29,7 +29,7 @@ namespace IHA::Engine {
 
         void Update(float deltaTime) override { };
 
-    private:
+    protected:
         std::unordered_map<Entity, T> m_data;
 	};
 
