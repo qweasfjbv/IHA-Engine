@@ -2,10 +2,13 @@
 #include <memory>
 #include <iostream>
 #include <cassert>
+#include <filesystem>
 
 #include "Core/World.h"
 #include "Core/Renderer.h"
 #include "Common/Logger.h"
+
+#include "Components/MeshRenderer.h"
 
 #ifdef DX12_ENABLE_DEBUG_LAYER
 #include <dxgidebug.h>
@@ -19,8 +22,22 @@ namespace IHA::Engine {
 		Logger::Init();
 		if (!CreateDeviceD3D(hWnd)) return false;
 		CreateRenderTarget();
-	
-		// m_cyclables.push_back(m_world);
+
+		/* vv TEST CODES vv */
+		m_meshRendererSystem = new MeshRendererSystem();
+		MeshRenderer meshRenderer;
+		meshRenderer.material = new Material();
+
+		std::filesystem::path base = std::filesystem::current_path();
+		auto shaderPath = base.parent_path().parent_path() / "src/shaders/cube.hlsl";
+		meshRenderer.material->shader = new Shader(shaderPath, shaderPath, m_device);
+		meshRenderer.material->texture = new Texture();
+
+		m_meshRendererSystem->Add(0, meshRenderer);
+		
+		m_cyclables.push_back(m_meshRendererSystem);
+		/* ^^ TEST CODES ^^ */
+
 		return true;
 	}
 
@@ -75,7 +92,7 @@ namespace IHA::Engine {
 
 	void EngineCore::Update()
 	{
-		// HACK - Timer ÇÊ¿ä
+		// HACK - Timer í•„ìš”
 
 		for (const auto& cycle : m_cyclables) {
 			cycle->Update(0.01f);

@@ -5,14 +5,11 @@ namespace IHA::Engine {
 	void MeshRendererSystem::Update(float deltaTime)
 	{
 		for (const auto& [_, meshRenderer] : m_data) {
-
-
-			// TODO - shader, texture µî ÇÑ¹ø¿¡ ¹ÙÀÎµå
+			// TODO - shader, texture ë“± í•œë²ˆì— ë°”ì¸ë“œ
 			meshRenderer.material->Bind(m_commandList);
 			meshRenderer.mesh->Bind(m_commandList);
 
 			meshRenderer.mesh->Draw(m_commandList);
 		}
 	}
-
 }

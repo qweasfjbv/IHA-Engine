@@ -10,13 +10,17 @@ namespace IHA::Engine {
 
     class Shader {
     public:
+        Shader(const std::wstring& vsPath, const std::wstring& psPath, ID3D12Device* device) {
+            Load(vsPath, psPath, device);
+        }
+
+        bool Load(const std::wstring& vsPath, const std::wstring& psPath, ID3D12Device* device);
+        void Bind(ID3D12GraphicsCommandList* cmd);
+
         ComPtr<ID3DBlob> vertexBlob;
         ComPtr<ID3DBlob> pixelBlob;
 
         ComPtr<ID3D12PipelineState> pso;
         ComPtr<ID3D12RootSignature> rootSignature;
-
-        bool Load(const std::wstring& vsPath, const std::wstring& psPath, ID3D12Device* device);
-        void Bind(ID3D12GraphicsCommandList* cmd);
     };
 }

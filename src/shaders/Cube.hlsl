@@ -10,7 +10,8 @@ cbuffer CBPerObject : register(b0)
 struct VSInput
 {
 	float3 pos : POSITION;
-	float3 col : COLOR0;
+	float3 normal : NORMAL;
+	float2 uv : TEXCOORD;
 };
 
 struct PSInput
@@ -25,7 +26,8 @@ PSInput VSMain(VSInput vin)
 	float4 worldPos = mul(float4(vin.pos, 1.0f), gWorld);
 	float4 viewPos = mul(worldPos, gView);
 	o.posH = mul(viewPos, gProj);
-	o.col = vin.col;
+	
+	o.col = float4(abs(vin.pos), 1.0f);
 	return o;
 }
 

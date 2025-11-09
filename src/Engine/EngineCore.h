@@ -14,6 +14,8 @@ namespace IHA::Engine {
 	class SceneGraph;
 	class ResourceManager;
 	class World;
+	class MeshRendererSystem;
+
 	struct ICyclable;
 
 	struct FrameContext
@@ -159,7 +161,8 @@ namespace IHA::Engine {
 		/* Cyclable Modules */
 		std::vector<ICyclable*>			m_cyclables;
 		World*							m_world;
-		
+		MeshRendererSystem*				m_meshRendererSystem = nullptr;
+
 		bool m_swapChainOccluded = false;
 	};
 }

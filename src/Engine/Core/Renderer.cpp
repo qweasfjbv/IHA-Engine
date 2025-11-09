@@ -1,4 +1,4 @@
-﻿#include "Renderer.h"
+#include "Renderer.h"
 #include "Components/Camera.h"
 
 namespace IHA::Engine {

@@ -10,14 +10,15 @@ namespace IHA::Engine {
 
     class Texture {
     public:
-        ComPtr<ID3D12Resource> resource;
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-        std::wstring name;
+        Texture(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, 
+            D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle);
 
-        bool LoadFromFile(const std::wstring& filePath, ID3D12Device* device,
-            ID3D12GraphicsCommandList* cmd, ID3D12DescriptorHeap* srvHeap, UINT descriptorIndex);
-
+        bool LoadFromFile(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd);
         void Bind(ID3D12GraphicsCommandList* cmd, UINT rootParamIndex);
+
+        ComPtr<ID3D12Resource> m_resource;
+        D3D12_CPU_DESCRIPTOR_HANDLE m_srvCpuHandle;
+        D3D12_GPU_DESCRIPTOR_HANDLE m_srvGpuHandle;
+        std::wstring m_name;
     };
 }

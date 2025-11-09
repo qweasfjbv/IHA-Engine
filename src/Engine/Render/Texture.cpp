@@ -12,7 +12,15 @@ namespace IHA::Engine {
         UINT firstSubresource,
         UINT numSubresources);
 
-    bool Texture::LoadFromFile(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12DescriptorHeap* srvHeap, UINT descriptorIndex)
+    Texture::Texture(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, 
+        D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle)
+    {
+        m_srvCpuHandle = srvCpuHandle;
+        m_srvGpuHandle = srvGpuHandle;
+        LoadFromFile(filePath, device, cmd);
+    }
+
+    bool Texture::LoadFromFile(const std::wstring& filePath, ID3D12Device* device, ID3D12GraphicsCommandList* cmd)
     {
         HRESULT hr;
         
@@ -74,13 +82,13 @@ namespace IHA::Engine {
             &texDesc,
             D3D12_RESOURCE_STATE_COPY_DEST,
             nullptr,
-            IID_PPV_ARGS(&resource));
+            IID_PPV_ARGS(&m_resource));
         if (FAILED(hr)) {
             LOG_ERROR("Failed to create GPU texture resource");
             return false;
         }
 
-        UINT64 uploadBufferSize = GetRequiredIntermediateSize_Manual(device, resource.Get(), 0, 1);
+        UINT64 uploadBufferSize = GetRequiredIntermediateSize_Manual(device, m_resource.Get(), 0, 1);
         D3D12_HEAP_PROPERTIES uploadHeapProps = {};
         uploadHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 
@@ -118,9 +126,9 @@ namespace IHA::Engine {
             memcpy(mappedData, imageData.data(), imageSize);
             uploadBuffer->Unmap(0, nullptr);
 
-            // º¹»ç ¸í·É ±â·Ï
+            // ë³µì‚¬ ëª…ë ¹ ê¸°ë¡
             D3D12_TEXTURE_COPY_LOCATION dst = {};
-            dst.pResource = resource.Get();
+            dst.pResource = m_resource.Get();
             dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
             dst.SubresourceIndex = 0;
 
@@ -134,7 +142,7 @@ namespace IHA::Engine {
 
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Transition.pResource = resource.Get();
+        barrier.Transition.pResource = m_resource.Get();
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
         barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -146,25 +154,18 @@ namespace IHA::Engine {
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Texture2D.MipLevels = 1;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuStart = srvHeap->GetCPUDescriptorHandleForHeapStart();
-        D3D12_GPU_DESCRIPTOR_HANDLE gpuStart = srvHeap->GetGPUDescriptorHandleForHeapStart();
-        UINT increment = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srvCpuHandle);
 
-        cpuHandle.ptr = cpuStart.ptr + (UINT64)descriptorIndex * increment;
-        gpuHandle.ptr = gpuStart.ptr + (UINT64)descriptorIndex * increment;
-
-        device->CreateShaderResourceView(resource.Get(), &srvDesc, cpuHandle);
-
-        name = filePath;
+        m_name = filePath;
         return true;
     }
 
     void Texture::Bind(ID3D12GraphicsCommandList* cmd, UINT rootParamIndex)
     {
-        if (gpuHandle.ptr == 0)
+        if (m_srvGpuHandle.ptr == 0)
             return;
 
-        cmd->SetGraphicsRootDescriptorTable(rootParamIndex, gpuHandle);
+        cmd->SetGraphicsRootDescriptorTable(rootParamIndex, m_srvGpuHandle);
     }
 
     UINT64 GetRequiredIntermediateSize_Manual(
