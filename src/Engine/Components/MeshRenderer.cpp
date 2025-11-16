@@ -6,10 +6,18 @@ namespace IHA::Engine {
 	{
 		for (const auto& [_, meshRenderer] : m_data) {
 			// TODO - shader, texture 등 한번에 바인드
-			meshRenderer.material->Bind(m_commandList);
-			meshRenderer.mesh->Bind(m_commandList);
 
-			meshRenderer.mesh->Draw(m_commandList);
+			// TODO - 행렬계산 필요
+			CBPerObject obj = {};
+			// obj.gWorld = 
+			// obj.gView = 
+			// obj.gProj = 
+			// meshRenderer.m_cbPerObject->CopyData(0, obj);
+
+			meshRenderer.m_material->Bind(m_commandList);
+			meshRenderer.m_mesh->Bind(m_commandList);
+
+			meshRenderer.m_mesh->Draw(m_commandList);
 		}
 	}
 }

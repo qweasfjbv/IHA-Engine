@@ -145,6 +145,7 @@
     <ClInclude Include="Common\Interfaces.h" />
     <ClInclude Include="Common\Logger.h" />
     <ClInclude Include="Common\MathHelper.h" />
+    <ClInclude Include="Common\UploadBuffer.h" />
     <ClInclude Include="Components\Camera.h" />
     <ClInclude Include="Components\MeshRenderer.h" />
     <ClInclude Include="Components\Transform.h" />
