@@ -9,10 +9,10 @@ namespace IHA::Engine {
 
 			// TODO - 행렬계산 필요
 			CBPerObject obj = {};
-			// obj.gWorld = 
+			obj.gWorld = meshRenderer.m_transform->GetWorldMatrix();
 			// obj.gView = 
 			// obj.gProj = 
-			// meshRenderer.m_cbPerObject->CopyData(0, obj);
+			meshRenderer.m_cbPerObject->CopyData(0, obj);
 
 			meshRenderer.m_material->Bind(m_commandList);
 			meshRenderer.m_mesh->Bind(m_commandList);

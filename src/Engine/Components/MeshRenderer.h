@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/ECS.h"
+#include "Components/Transform.h"
 #include "Common/UploadBuffer.h"
 #include "Render/Mesh.h"
 #include "Render/Material.h"
@@ -16,8 +17,10 @@ namespace IHA::Engine
 	};
 
 	struct MeshRenderer : public Component {
+		Transform* m_transform = nullptr;
 		Mesh* m_mesh = nullptr;
 		Material* m_material = nullptr;
+		
 		std::unique_ptr<UploadBuffer<CBPerObject>> m_cbPerObject;
 	};
 

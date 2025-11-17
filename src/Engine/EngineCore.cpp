@@ -25,15 +25,23 @@ namespace IHA::Engine {
 
 		/* vv TEST CODES vv */
 		m_meshRendererSystem = new MeshRendererSystem();
-		MeshRenderer meshRenderer;
-		meshRenderer.material = new Material();
+		MeshRenderer& meshRenderer = m_meshRendererSystem->Add(0);
+		meshRenderer.m_material = new Material();
 
 		std::filesystem::path base = std::filesystem::current_path();
 		auto shaderPath = base.parent_path().parent_path() / "src/shaders/cube.hlsl";
-		meshRenderer.material->shader = new Shader(shaderPath, shaderPath, m_device);
-		meshRenderer.material->texture = new Texture();
+		meshRenderer.m_material->shader = new Shader(shaderPath, shaderPath, m_device);
 
-		m_meshRendererSystem->Add(0, meshRenderer);
+		D3D12_CPU_DESCRIPTOR_HANDLE cbvCpuDescHandle;
+		D3D12_GPU_DESCRIPTOR_HANDLE cbvGpuDescHandle;
+		g_srvDescHeapAlloc->Alloc(&cbvCpuDescHandle, &cbvGpuDescHandle);
+
+		meshRenderer.m_cbPerObject = std::make_unique<UploadBuffer<CBPerObject>>(
+			m_device,
+			cbvCpuDescHandle
+		);
+		// meshRenderer.m_material->texture = new Texture();
+
 		
 		m_cyclables.push_back(m_meshRendererSystem);
 		/* ^^ TEST CODES ^^ */
